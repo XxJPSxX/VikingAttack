@@ -10,7 +10,7 @@ from PPlay.sound import  *
 from pygame import *
 #Subprogramas
 def inimigo1():
-    soldado1 = Sprite("imagens\soldado1\.teste2.png", 9)
+    soldado1 = Sprite("imagens\soldado1\soldado1frente.png", 9)
     larguraSol1 = soldado1.width
     alturaSol1 = soldado1.height
     soldado1.set_sequence(0, 9)
