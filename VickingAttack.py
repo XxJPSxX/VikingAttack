@@ -19,10 +19,12 @@ def inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, p
     soldado1.set_sequence(animacaoInicial, animacaoFinal) # Tem que ser até apenas o 5 pois o Sprite está com problema.
     soldado1.set_total_duration(duracao)
     soldado1.set_position(posX, posY-alturaSol1)
-    return soldado1
+    return soldado1, alturaSol1
 def movimentacao(posX, posY, objeto, vetorDeEnderecos, velocidadeObjeto):
     #Condições diferentes para cada cenário, tais coordenadas valem para o cenário 1.3.5
     #Troca de animação dependendo da direção do movimento(A fazer...)
+    velX = 0
+    velY = 0
     if (int(posX) < 390) and (int(posY) in range(90, 150)):
         objeto.move_x(velocidadeObjeto)
         objeto.move_y(0)
@@ -87,11 +89,13 @@ janela.set_background_color((0, 0, 0))
 icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
 pygame.display.set_icon(icone)
 #Inimigos
-soldado1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
-#vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1frente.png"]
+soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
+vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1frente.png"] #Vetor para ser usado posteriormente
 #Musica
 kingarthur = Sound("musicas\kingarthur.ogg")
 kingarthur.set_volume(10)
+verificador1 = 0
+verificador2 = 0
 #GameLoop
 while True:
     janela.set_background_color((0, 0, 0))
@@ -106,8 +110,26 @@ while True:
     posXSol1 = soldado1.x
     posYSol1 = soldado1.y
     velX, velY = movimentacao(posXSol1, posYSol1, soldado1, vetorSoldado1, 1)
-    if velY > 0 :
-        soldado1 = Sprite("imagens\soldado1\soldado1frente.png")
+    print(velX, velY)
+    #Troca de animações
+    if verificador1 == 0:
+        if velY > 0 :
+            posXSol1 = soldado1.x
+            posYSol1 = soldado1.y
+            soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1frente.png", 9, 0, 9, 1000, posXSol1, posYSol1+alturaSol1)
+            verificador1 = 1
+    if velX == 1 or velX == -1:
+        verificador1 = 0
+    posYSol1 = soldado1.y
+    if verificador2 == 0 and posYSol1 in range(415, 500):
+        if velX > 0:
+            posXSol1 = soldado1.x
+            posYSol1 = soldado1.y
+            soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, posXSol1, posYSol1+alturaSol1)
+            verificador2 = 1
+
+
+
 
     #Musica
     kingarthur.play()
