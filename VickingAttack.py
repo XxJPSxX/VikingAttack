@@ -20,7 +20,7 @@ def inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, p
     soldado1.set_total_duration(duracao)
     soldado1.set_position(posX, posY-alturaSol1)
     return soldado1, alturaSol1
-def movimentacao(posX, posY, objeto, vetorDeEnderecos, velocidadeObjeto):
+def movimentacao(posX, posY, objeto, velocidadeObjeto):
     #Condições diferentes para cada cenário, tais coordenadas valem para o cenário 1.3.5
     #Troca de animação dependendo da direção do movimento(A fazer...)
     velX = 0
@@ -150,7 +150,7 @@ while True:
         #Movimentacao do Soldado1
     posXSol1 = soldado1.x
     posYSol1 = soldado1.y
-    velX, velY = movimentacao(posXSol1, posYSol1, soldado1, vetorSoldado1, 1)
+    velX, velY = movimentacao(posXSol1, posYSol1, soldado1, 1)
     print(velX, velY)
         #Troca de animações do Soldado 1
     soldado1 = mudancaDeAnimacao(soldado1, velX, velY, vetorSoldado1, vetorVerificadoresSol1)
