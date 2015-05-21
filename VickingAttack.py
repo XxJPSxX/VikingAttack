@@ -65,7 +65,7 @@ def movimentacao(posX, posY, objeto, velocidadeObjeto):
         objeto.move_y(-velocidadeObjeto)
         velX = 0
         velY = -velocidadeObjeto
-    if int(posX) in range(460, 660) and int(posY) in range(90, 100):
+    if int(posX) in range(460, 660) and int(posY) in range(90, 105):
         objeto.move_x(velocidadeObjeto)
         objeto.move_y(0)
         velX = velocidadeObjeto
@@ -134,8 +134,8 @@ soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 10
 vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"] #Vetor para ser usado posteriormente
 vetorVerificadoresSol1 = [0, 0, 0, 0]
 #Musica
-kingarthur = Sound("musicas\kingarthur.ogg")
-kingarthur.set_volume(10)
+musicaAtual = Sound("musicas\kingarthur.ogg")
+musicaAtual.set_volume(10)
 
 #GameLoop
 while True:
@@ -155,5 +155,5 @@ while True:
         #Troca de animações do Soldado 1
     soldado1 = mudancaDeAnimacao(soldado1, velX, velY, vetorSoldado1, vetorVerificadoresSol1)
     #Musica
-    kingarthur.play()
+    musicaAtual.play()
     janela.update()
