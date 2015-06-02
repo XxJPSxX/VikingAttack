@@ -26,48 +26,49 @@ def movimentacao(posX, posY, objeto, velocidadeObjeto):
     #Troca de animação dependendo da direção do movimento(A fazer...)
     velX = 0
     velY = 0
+    delta = velocidadeObjeto * janela.delta_time() #Criou-se o "delta" para que a velocidade seja igual em todas as máquinas
     if (int(posX) < 390) and (int(posY) in range(90, 150)):
-        objeto.move_x(velocidadeObjeto)
+        objeto.move_x(delta)
         objeto.move_y(0)
         velX = velocidadeObjeto
         velY = 0
     if int(posX) in range(390, 395) and int(posY) in range(90, 330):
         objeto.move_x(0)
-        objeto.move_y(velocidadeObjeto)
+        objeto.move_y(delta)
         velX = 0
         velY = velocidadeObjeto
     if int(posX) in range(423, 60, -1) and int(posY) in range(250, 265):
-        objeto.move_x(-velocidadeObjeto)
+        objeto.move_x(-delta)
         objeto.move_y(0)
         velX = -velocidadeObjeto
         velY = 0
     if (int(posX) < 80) and int(posY) in range(250, 500):
         objeto.move_x(0)
-        objeto.move_y(velocidadeObjeto)
+        objeto.move_y(delta)
         velX = 0
         velY = velocidadeObjeto
     if (int(posX) in range(60, 630)) and (int(posY) in range(415, 500)):
-        objeto.move_x(velocidadeObjeto)
+        objeto.move_x(delta)
         objeto.move_y(0)
         velX = velocidadeObjeto
         velY = 0
     if (int(posX) in range(630, 635)) and int(posY) in range(475, 255, -1):
         objeto.move_x(0)
-        objeto.move_y(-velocidadeObjeto)
+        objeto.move_y(-delta)
         velX = 0
         velY = -velocidadeObjeto
     if int(posX) in range(630, 460, -1) and int(posY) in range(250, 260):
-        objeto.move_x(-velocidadeObjeto)
+        objeto.move_x(-delta)
         objeto.move_y(0)
         velX = -velocidadeObjeto
         velY = 0
     if int(posX) in range(460, 465) and int(posY) in range(261, 90, -1):
         objeto.move_x(0)
-        objeto.move_y(-velocidadeObjeto)
+        objeto.move_y(-delta)
         velX = 0
         velY = -velocidadeObjeto
     if int(posX) in range(460, 661) and int(posY) in range(90, 105):
-        objeto.move_x(velocidadeObjeto)
+        objeto.move_x(delta)
         objeto.move_y(0)
         velX = velocidadeObjeto
         velY = 0
@@ -133,10 +134,26 @@ def torreAtira(listaTorre, bloco, listaAlvo):
     #Alcance em Y
     areaY1 = (bloco[1] - listaTorre[2])-listaAlvo[1]
     areaY2 = bloco[1] + listaTorre[2]
-    if listaAlvo[0].x in range(areaX1, areaX2) and listaAlvo[0].y in range(areaY1, areaY2):
-        print("DENTRO DA AREA DA TORRE")
-    #    listaAlvo[2] = listaAlvo[2] - listaTorre[4]
+    #Tem que converter para int, pois se não a comparação não funciona
+    if int(listaAlvo[0].x) in range(areaX1, areaX2) and int(listaAlvo[0].y) in range(areaY1, areaY2):
+        if listaAlvo[2] > 0:
+            print("DENTRO DA AREA DA TORRE")
+            listaAlvo[2] = listaAlvo[2] - listaTorre[4]
+            janela.draw_text(str(listaAlvo[2]), listaAlvo[0].x, listaAlvo[0].y, 12, (255, 0 , 0), "Arial")
+            print(listaAlvo[2])
     return
+
+def verificaPosMouse(xInicial, xFinal, yInicial, yFinal):
+    x, y = pygame.mouse.get_pos()
+    if x in range(xInicial, xFinal) and y in range(yInicial, yFinal):
+        return True
+    return False
+
+def Estado():
+    #Máquina de Estados
+    MENU = 0
+    EMJOGO = 1
+
 #Principal
 #Fundo
 background = GameImage("imagens\cenarios\cenario1.3.5.png")
@@ -162,7 +179,7 @@ vidaSol1 = 100
 listaSoldado1 = [soldado1, alturaSol1, vidaSol1]
 vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
 vetorVerificadoresSol1 = [0, 0, 0, 0]
-velocidadeSol1 = 1
+velocidadeSol1 = 50
 #Musica
 musicaAtual = Sound("musicas\kingarthur.ogg")
 musicaAtual.set_volume(10)
@@ -179,33 +196,46 @@ spriteTorre1 = "imagens\Torres\TorrePedra.png" #Tive que definir o sprite antes
 torre1 = torre(spriteTorre1, bloco1)
 #listaTorre = [objeto, alcanceX, alcanceY, taxaDeDisparo, dano]
 listaTorre1 = [torre1, 100, 100, "??", 10] #VALORES DESTINADOS À TESTE
-
+confirmador = 0
+contador = 0
 #GameLoop
 while True:
+    contador = contador + 1
 
     janela.set_background_color((0, 0, 0))
     background.draw()
     #Inimigos
 
     #Soldado1
-    listaSoldado1[0].move_x(0)
-    listaSoldado1[0].move_y(0)
-    listaSoldado1[0].update()
-    listaSoldado1[0].draw()
-        #Movimentacao do Soldado 1
-    posXSol1 = listaSoldado1[0].x
-    posYSol1 = listaSoldado1[0].y
-    velXSol1, velYSol1 = movimentacao(posXSol1, posYSol1, listaSoldado1[0], velocidadeSol1)
-        #Troca de animações do Soldado 1
-    listaSoldado1[0] = mudancaDeAnimacao(listaSoldado1[0], velXSol1, velYSol1, vetorSoldado1, vetorVerificadoresSol1)
+    if listaSoldado1[2] > 0:
+
+
+        listaSoldado1[0].move_x(0)
+        listaSoldado1[0].move_y(0)
+        listaSoldado1[0].update()
+        listaSoldado1[0].draw()
+        janela.draw_text(str(listaSoldado1[2]), listaSoldado1[0].x, listaSoldado1[0].y, 12, (255, 0 , 0), "Arial", False)
+            #Movimentacao do Soldado 1
+        posXSol1 = listaSoldado1[0].x
+        posYSol1 = listaSoldado1[0].y
+        velXSol1, velYSol1 = movimentacao(posXSol1, posYSol1, listaSoldado1[0], velocidadeSol1)
+            #Troca de animações do Soldado 1
+        listaSoldado1[0] = mudancaDeAnimacao(listaSoldado1[0], velXSol1, velYSol1, vetorSoldado1, vetorVerificadoresSol1)
     #torre(posXSol1, posYSol1)
     #Torres
-    listaTorre1[0].draw()
-    torreAtira(listaTorre1, bloco1, listaSoldado1)
+    if verificaPosMouse(270, 370, 150, 260) and confirmador == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
+        if pygame.mouse.get_pressed()[0]:
+            confirmador = 1
+    if confirmador == 1:
+        listaTorre1[0].draw()
+        if contador%40 == 0:
+            torreAtira(listaTorre1, bloco1, listaSoldado1)
+
     #Musica
     #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
     #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
     #Mouse
         #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
+        #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
     pygame.mouse.set_cursor(*pygame.cursors.tri_left)
     janela.update()
