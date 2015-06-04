@@ -17,7 +17,7 @@ def inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, p
     soldado = Sprite(endereco, animacao)
     larguraSol = soldado.width
     alturaSol = soldado.height
-    soldado.set_sequence(animacaoInicial, animacaoFinal) # Tem que ser até apenas o 5 pois o Sprite está com problema.
+    soldado.set_sequence(animacaoInicial, animacaoFinal)
     soldado.set_total_duration(duracao)
     soldado.set_position(posX, posY-alturaSol)
     return soldado, alturaSol
@@ -27,6 +27,7 @@ def movimentacao(posX, posY, objeto, velocidadeObjeto):
     velX = 0
     velY = 0
     delta = velocidadeObjeto * janela.delta_time() #Criou-se o "delta" para que a velocidade seja igual em todas as máquinas
+    velocidadeObjeto = delta
     if (int(posX) < 390) and (int(posY) in range(90, 150)):
         objeto.move_x(delta)
         objeto.move_y(0)
@@ -57,7 +58,7 @@ def movimentacao(posX, posY, objeto, velocidadeObjeto):
         objeto.move_y(-delta)
         velX = 0
         velY = -velocidadeObjeto
-    if int(posX) in range(630, 460, -1) and int(posY) in range(250, 260):
+    if int(posX) in range(631, 460, -1) and int(posY) in range(250, 260):
         objeto.move_x(-delta)
         objeto.move_y(0)
         velX = -velocidadeObjeto
@@ -98,7 +99,7 @@ def mudancaDeAnimacao(objeto, velX, velY, vetorSprites, verificadorObj):
         verificadorObj[1] = 0
     posX = objeto.x
     posY = objeto.y
-    if (verificadorObj[2] == 0 and posY in range(415, 500)) or (verificadorObj[2] ==0 and int(posX) in range(460, 661) and int(posY) in range(90, 101)):
+    if (verificadorObj[2] == 0 and posY in range(410, 500)) or (verificadorObj[2] ==0 and int(posX) in range(460, 661) and int(posY) in range(90, 101)):
         if velX > 0:
             posX = objeto.x
             posY = objeto.y
@@ -134,13 +135,13 @@ def torreAtira(listaTorre, bloco, listaAlvo):
     #Alcance em Y
     areaY1 = (bloco[1] - listaTorre[2])-listaAlvo[1]
     areaY2 = bloco[1] + listaTorre[2]
+
     #Tem que converter para int, pois se não a comparação não funciona
     if int(listaAlvo[0].x) in range(areaX1, areaX2) and int(listaAlvo[0].y) in range(areaY1, areaY2):
         if listaAlvo[2] > 0:
             print("DENTRO DA AREA DA TORRE")
             listaAlvo[2] = listaAlvo[2] - listaTorre[4]
-            janela.draw_text(str(listaAlvo[2]), listaAlvo[0].x, listaAlvo[0].y, 12, (255, 0 , 0), "Arial")
-            print(listaAlvo[2])
+
     return
 
 def verificaPosMouse(xInicial, xFinal, yInicial, yFinal):
@@ -149,7 +150,7 @@ def verificaPosMouse(xInicial, xFinal, yInicial, yFinal):
         return True
     return False
 
-def Estado():
+def Estado(): # EM CONSTRUÇÃO
     #Máquina de Estados
     MENU = 0
     EMJOGO = 1
@@ -179,7 +180,7 @@ vidaSol1 = 100
 listaSoldado1 = [soldado1, alturaSol1, vidaSol1]
 vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
 vetorVerificadoresSol1 = [0, 0, 0, 0]
-velocidadeSol1 = 50
+velocidadeSol1 = 30
 #Musica
 musicaAtual = Sound("musicas\kingarthur.ogg")
 musicaAtual.set_volume(10)
@@ -198,9 +199,21 @@ torre1 = torre(spriteTorre1, bloco1)
 listaTorre1 = [torre1, 100, 100, "??", 10] #VALORES DESTINADOS À TESTE
 confirmador = 0
 contador = 0
+#Flecha
+flecha = Sprite("imagens\Flecha.png", 1)
+flecha.set_sequence(0, 1)
+flecha.set_total_duration(0)
+verifica = 0
 #GameLoop
 while True:
     contador = contador + 1
+
+    if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
+    #nos primeiros frames este valor está bugado portanto precisa-se esperar um pouco, posteriormente, com a tela de inicialização
+    #o problema deve sumir.
+        velocidadeSol1 = 1
+    else:
+        velocidadeSol1 = 100
 
     janela.set_background_color((0, 0, 0))
     background.draw()
@@ -231,6 +244,23 @@ while True:
         if contador%40 == 0:
             torreAtira(listaTorre1, bloco1, listaSoldado1)
 
+
+    if contador in range(300, 400): # MOVIMENTO PRIMITIVO DA FLECHA, O IMPORTANTE É A FORMULA OBTIDA ABAIXO
+        x = (flecha.x - listaSoldado1[0].x)
+        if x < 0:
+            x = -x
+        y = (flecha.y - listaSoldado1[0].y)
+        if y < 0:
+            y = -y
+        proporcao = x/y
+        flecha.move_x(10)
+        flecha.move_y(10/proporcao)
+
+    if not flecha.collided(listaSoldado1[0]) and verifica == 0:
+        flecha.draw()
+        flecha.update()
+    if flecha.collided(listaSoldado1[0]):
+        verifica = 1
     #Musica
     #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
     #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
