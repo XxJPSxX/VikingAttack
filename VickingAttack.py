@@ -83,34 +83,34 @@ def mudancaDeAnimacao(objeto, velX, velY, vetorSprites, verificadorObj):
     altura = objeto.height
     if verificadorObj[0] == 0:
         if velX < 0:
-            posX = objeto.x
-            posY = objeto.y
+            posX = int(objeto.x)
+            posY = int(objeto.y)
             objeto, altura = inimigo(vetorSprites[1], 9, 0, 9, 1000, posX, posY + altura)
             verificadorObj[0] = 1
     if velY != 0:
         verificadorObj[0] = 0
     if verificadorObj[1] == 0:
         if velY > 0 :
-            posX = objeto.x
-            posY = objeto.y
+            posX = int(objeto.x)
+            posY = int(objeto.y)
             objeto, altura = inimigo(vetorSprites[2], 9, 0, 9, 1000, posX, posY + altura)
             verificadorObj[1] = 1
     if velX != 0:
         verificadorObj[1] = 0
-    posX = objeto.x
-    posY = objeto.y
-    if (verificadorObj[2] == 0 and posY in range(410, 500)) or (verificadorObj[2] ==0 and int(posX) in range(460, 661) and int(posY) in range(90, 101)):
+    posX = int(objeto.x)
+    posY = int(objeto.y)
+    if (verificadorObj[2] == 0 and posY in range(400, 500)) or (verificadorObj[2] ==0 and int(posX) in range(460, 661) and int(posY) in range(90, 101)):
         if velX > 0:
-            posX = objeto.x
-            posY = objeto.y
+            posX = int(objeto.x)
+            posY = int(objeto.y)
             objeto, altura = inimigo(vetorSprites[0], 9, 0, 9, 1000, posX, posY + altura)
             verificadorObj[2] = 1
     if velY != 0:
         verificadorObj[2] = 0
     if verificadorObj[3] == 0:
         if velY < 0 :
-            posX = objeto.x
-            posY = objeto.y
+            posX = int(objeto.x)
+            posY = int(objeto.y)
             objeto, altura = inimigo(vetorSprites[3], 9, 0, 9, 1000, posX, posY + altura)
             verificadorObj[3] = 1
     if velX != 0:
@@ -202,6 +202,7 @@ contador = 0
 #Flecha
 flecha = Sprite("imagens\Flecha.png", 1)
 flecha.set_sequence(0, 1)
+flecha.set_position(0, 600)
 flecha.set_total_duration(0)
 verifica = 0
 #GameLoop
@@ -213,7 +214,7 @@ while True:
     #o problema deve sumir.
         velocidadeSol1 = 1
     else:
-        velocidadeSol1 = 100
+        velocidadeSol1 = 50
 
     janela.set_background_color((0, 0, 0))
     background.draw()
@@ -244,19 +245,24 @@ while True:
         if contador%40 == 0:
             torreAtira(listaTorre1, bloco1, listaSoldado1)
 
-
-    if contador in range(300, 400): # MOVIMENTO PRIMITIVO DA FLECHA, O IMPORTANTE É A FORMULA OBTIDA ABAIXO
+    if (verifica == 0) and contador in range(300, 500): #MOVIMENTO PRIMITIVO DA FLECHA
         x = (flecha.x - listaSoldado1[0].x)
-        if x < 0:
-            x = -x
         y = (flecha.y - listaSoldado1[0].y)
-        if y < 0:
-            y = -y
         proporcao = x/y
-        flecha.move_x(10)
-        flecha.move_y(10/proporcao)
-
-    if not flecha.collided(listaSoldado1[0]) and verifica == 0:
+        if proporcao < 0:
+            proporcao = -proporcao
+        if x > 0:
+            velx = -10
+        else:
+            velx = 10
+        if y > 0:
+            vely = -10
+        else:
+            vely = 10
+        flecha.move_x(velx)
+        flecha.move_y(vely/proporcao)
+        print("VEL:",velx)
+        print("VEL/prop", vely/proporcao)
         flecha.draw()
         flecha.update()
     if flecha.collided(listaSoldado1[0]):
