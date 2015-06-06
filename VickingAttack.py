@@ -154,6 +154,52 @@ def Estado(): # EM CONSTRUÇÃO
     #Máquina de Estados
     MENU = 0
     EMJOGO = 1
+    return
+
+def criaFlecha(imagem, posX, posY):
+    flecha = Sprite(imagem, 1)
+    flecha.set_position(posX, posY)
+    flecha.set_sequence(0, 1)
+    flecha.set_total_duration(0)
+    verifica = 0 #apenas para simplificar a primeira chamada
+    return flecha, verifica
+
+def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo): #Movimenta e muda a imagem do projetil
+    if (verifica == 0) and contador in range(100, 200): #MOVIMENTO PRIMITIVO DA FLECHA
+        x = (flecha.x - listaSoldado1[0].x)
+        y = (flecha.y - listaSoldado1[0].y)
+        proporcao = x/y
+        if proporcao < 0:
+            proporcao = -proporcao
+        if x > 0:
+            velx = -vetorProjetil[4]
+        else:
+            velx = vetorProjetil[4]
+        if y > 0:
+            vely = -vetorProjetil[4]
+        else:
+            vely = vetorProjetil[4]
+
+        vely = vely/proporcao
+        flechaPOS = flecha
+        if velx > 0 and vely > 0: #Regula a imagem da flecha, os comentários(tentam) representam o sentido da flecha
+            flecha, verifica = criaFlecha(vetorProjetil[0], flecha.x, flecha.y) # \>
+        if velx < 0 and vely > 0:
+            flecha, verifica = criaFlecha(vetorProjetil[1], flecha.x, flecha.y) # </
+        if velx < 0 and vely < 0:
+            flecha, verifica = criaFlecha(vetorProjetil[2], flecha.x, flecha.y) # <\
+        if velx > 0 and vely < 0:
+            flecha, verifica = criaFlecha(vetorProjetil[3], flecha.x, flecha.y) # />
+
+        flecha.move_x(velx)
+        flecha.move_y(vely)
+        print("VEL:", velx)
+        print("VEL/prop", vely)
+        flecha.draw()
+        flecha.update()
+    if flecha.collided(vetorInimigo[0]):
+        verifica = 1
+    return flecha, verifica
 
 #Principal
 #Fundo
@@ -199,14 +245,12 @@ torre1 = torre(spriteTorre1, bloco1)
 listaTorre1 = [torre1, 100, 100, "??", 10] #VALORES DESTINADOS À TESTE
 confirmador = 0
 contador = 0
-#Flecha
-flecha = Sprite("imagens\Flecha.png", 1)
-flecha.set_sequence(0, 1)
-flecha.set_position(0, 600)
-flecha.set_total_duration(0)
-verifica = 0
+#Define Flecha
+vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 5]
+flecha, verifica = criaFlecha(vetorFlecha1[0], 0, 0)
 #GameLoop
 while True:
+    #Contador de frames
     contador = contador + 1
 
     if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
@@ -244,29 +288,10 @@ while True:
         listaTorre1[0].draw()
         if contador%40 == 0:
             torreAtira(listaTorre1, bloco1, listaSoldado1)
-
-    if (verifica == 0) and contador in range(300, 500): #MOVIMENTO PRIMITIVO DA FLECHA
-        x = (flecha.x - listaSoldado1[0].x)
-        y = (flecha.y - listaSoldado1[0].y)
-        proporcao = x/y
-        if proporcao < 0:
-            proporcao = -proporcao
-        if x > 0:
-            velx = -10
-        else:
-            velx = 10
-        if y > 0:
-            vely = -10
-        else:
-            vely = 10
-        flecha.move_x(velx)
-        flecha.move_y(vely/proporcao)
-        print("VEL:",velx)
-        print("VEL/prop", vely/proporcao)
-        flecha.draw()
+    #Flecha
+    if verifica == 0:
+        flecha, verifica = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1)
         flecha.update()
-    if flecha.collided(listaSoldado1[0]):
-        verifica = 1
     #Musica
     #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
     #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
