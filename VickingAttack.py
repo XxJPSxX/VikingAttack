@@ -125,7 +125,7 @@ def torre(imagemTorre, bloco):
     torre.set_position(bloco[0]-larguraTorre, bloco[1]-alturaTorre)
     return torre
 
-def torreAtira(listaTorre, bloco, listaAlvo):
+def torreAtira(listaTorre, bloco, listaAlvo, verificaTiro, verificaColisao):
     #Criei um quadrado com as coordenadas, que corresponde a área de ataque da torre
     #listaTorre = [sprite, alcanceX, alcanceY, taxaDeDisparo, dano]
     #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado]
@@ -141,8 +141,13 @@ def torreAtira(listaTorre, bloco, listaAlvo):
         if listaAlvo[2] > 0:
             print("DENTRO DA AREA DA TORRE")
             listaAlvo[2] = listaAlvo[2] - listaTorre[4]
+            verificaColisao = 0
+            verificaTiro = 0
+    else:
+        verificaColisao = 1
+        verificaTiro = 1
 
-    return
+    return verificaTiro, verificaColisao
 
 def verificaPosMouse(xInicial, xFinal, yInicial, yFinal):
     x, y = pygame.mouse.get_pos()
@@ -164,8 +169,8 @@ def criaFlecha(imagem, posX, posY):
     verifica = 0 #apenas para simplificar a primeira chamada
     return flecha, verifica
 
-def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo): #Movimenta e muda a imagem do projetil
-    if (verifica == 0) and contador in range(100, 200): #MOVIMENTO PRIMITIVO DA FLECHA
+def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, verificaTiro): #Movimenta e muda a imagem do projetil
+    if (verifica == 0):# and contador in range(100, 200): #MOVIMENTO PRIMITIVO DA FLECHA
         x = (flecha.x - listaSoldado1[0].x)
         y = (flecha.y - listaSoldado1[0].y)
         proporcao = x/y
@@ -199,7 +204,8 @@ def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo): #
         flecha.update()
     if flecha.collided(vetorInimigo[0]):
         verifica = 1
-    return flecha, verifica
+        verificaTiro = 0
+    return flecha, verifica, verificaTiro
 
 #Principal
 #Fundo
@@ -248,6 +254,7 @@ contador = 0
 #Define Flecha
 vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 5]
 flecha, verifica = criaFlecha(vetorFlecha1[0], 0, 0)
+verificaTiro = 1
 #GameLoop
 while True:
     #Contador de frames
@@ -286,11 +293,16 @@ while True:
             confirmador = 1
     if confirmador == 1:
         listaTorre1[0].draw()
-        if contador%40 == 0:
-            torreAtira(listaTorre1, bloco1, listaSoldado1)
+        if contador%100 == 0:
+            verificaTiro, verifica = torreAtira(listaTorre1, bloco1, listaSoldado1, verificaTiro, verifica)
+            flecha, verifica = criaFlecha(vetorFlecha1[0], bloco1[0], bloco1[1])
+
     #Flecha
-    if verifica == 0:
-        flecha, verifica = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1)
+    if verifica == 0 and verificaTiro == 0:
+
+        flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
+
+        print("EXECUTANDO")
         flecha.update()
     #Musica
     #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
