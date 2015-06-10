@@ -1,4 +1,6 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
+"""Versão Atual:  v1.2.6.1"""
+#OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
 from PPlay.sprite import *
@@ -14,7 +16,7 @@ larguraFundo = background.width
 alturaFundo = background.height
 #Janela
 larguraJanela = 800
-alturaJanela = 608
+alturaJanela = 600
 janela = Window(larguraFundo, alturaFundo)
 janela.set_title("Viking Attack")
 janela.set_background_color((0, 0, 0))
@@ -195,11 +197,10 @@ def verificaDeltaTime():
 
 def menu():
     Game_Estate = 0
-    background = GameImage("imagens\cenarios\cenario1.3.5.png")
-    background.draw()
-    janela.draw_text("Aperte Enter pra começar",200,200,45,(255,255,255),"Arial",True,True)
-
-
+    #background = GameImage("imagens\cenarios\cenario1.3.5.png") Mudar para a imagem do fundo!!
+    #background.draw()
+    janela.draw_text("Aperte Enter pra começar", 200, 200, 45, (255, 255, 255), "Arial", True, True)
+    janela.draw_text("v1.2.6.1", 0, 584, 15, (255, 255, 255), "Arial")
     if teclado.key_pressed("enter"):
         Game_Estate = 1
     janela.update()
@@ -316,7 +317,7 @@ while True:
             velocidadeSol1 = 1
             deltaTime = verificaDeltaTime()
         else:
-            velocidadeSol1 = 800
+            velocidadeSol1 = 60
 
         janela.set_background_color((0, 0, 0))
         background.draw()
