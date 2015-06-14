@@ -1,5 +1,5 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
-"""Versão Atual:  v1.2.6.1"""
+"""Versão Atual:  v1.2.6.2"""
 #OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
@@ -164,7 +164,6 @@ def torreAtira(listaTorre, bloco, listaAlvo, verificaTiro, verificaColisao):
     #Tem que converter para int, pois se não a comparação não funciona
     if int(listaAlvo[0].x) in range(areaX1, areaX2) and int(listaAlvo[0].y) in range(areaY1, areaY2):
         if listaAlvo[2] > 0:
-            print("DENTRO DA AREA DA TORRE")
             listaAlvo[2] = listaAlvo[2] - listaTorre[4]
             verificaColisao = 0
             verificaTiro = 0
@@ -182,7 +181,7 @@ def verificaPosMouse(xInicial, xFinal, yInicial, yFinal):
 
 def pausa():
     Game_Estate = 2
-    janela.draw_text("Aperte Enter pra sair da Pausa",200,200,45,(255,255,255),"Arial",True,True)
+    janela.draw_text("Aperte Enter pra sair da Pausa",110,200,45,(255,255,255),"Arial",True,True)
 
     if teclado.key_pressed("enter"):
         Game_Estate = 1
@@ -199,8 +198,8 @@ def menu():
     Game_Estate = 0
     #background = GameImage("imagens\cenarios\cenario1.3.5.png") Mudar para a imagem do fundo!!
     #background.draw()
-    janela.draw_text("Aperte Enter pra começar", 200, 200, 45, (255, 255, 255), "Arial", True, True)
-    janela.draw_text("v1.2.6.1", 0, 584, 15, (255, 255, 255), "Arial")
+    janela.draw_text("Aperte Enter pra começar", 150, 200, 45, (255, 255, 255), "Arial", True, True)
+    janela.draw_text("v1.2.6.2", 0, 584, 15, (255, 255, 255), "Arial")
     if teclado.key_pressed("enter"):
         Game_Estate = 1
     janela.update()
@@ -233,7 +232,6 @@ def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, ve
             vely = vetorProjetil[4]
 
         vely = vely/proporcao
-        flechaPOS = flecha
         if velx > 0 and vely > 0: #Regula a imagem da flecha, os comentários(tentam) representam o sentido da flecha
             flecha, verifica = criaFlecha(vetorProjetil[0], flecha.x, flecha.y) # \>
         if velx < 0 and vely > 0:
@@ -245,8 +243,6 @@ def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, ve
 
         flecha.move_x(velx)
         flecha.move_y(vely)
-        print("VEL:", velx)
-        print("VEL/prop", vely)
         flecha.draw()
         flecha.update()
     if flecha.collided(vetorInimigo[0]):
@@ -271,6 +267,7 @@ vidaSol1 = 100
 #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado]
 listaSoldado1 = [soldado1, alturaSol1, vidaSol1]
 vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
+vetorSoldado2 =["imagens\soldado2\soldado2lado1.png", "imagens\soldado2\soldado2lado2.png", "imagens\soldado2\soldado2frente.png", "imagens\soldado2\soldado2costas.png"]
 vetorVerificadoresSol1 = [0, 0, 0, 0]
 velocidadeSol1 = 60
 #Musica
@@ -298,7 +295,7 @@ confirmador1 = 0
 confirmador2 = 0
 contador = 0
 #Define Flecha
-vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 0.5]
+vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 3]
 flecha, verifica = criaFlecha(vetorFlecha1[0], 0, 0)
 verificaTiro = 1
 #GameLoop
@@ -310,15 +307,12 @@ while True:
             Game_Estate = 2
          #Contador de frames
         contador = contador + 1
-
+        print(contador)
         if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
-        #nos primeiros frames este valor está bugado portanto precisa-se esperar um pouco, posteriormente, com a tela de inicialização
-        #o problema deve sumir.
-            velocidadeSol1 = 1
+            #por isso ao iniciar o jogo armazenamos o valor do deltaTime da máquina em que o código está sendo executado para que
+            #quando pausarmos o jogo usaremos esse valor.
+            #velocidadeSol1 = 1
             deltaTime = verificaDeltaTime()
-        else:
-            velocidadeSol1 = 60
-
         janela.set_background_color((0, 0, 0))
         background.draw()
         #Inimigos
@@ -341,6 +335,7 @@ while True:
         #torre(posXSol1, posYSol1)
         #Torres
         ############BLOCO 1############
+        #OBS! As torres devem estar dentro de uma condição que verifica se o alvo delas já foi abatido
         if verificaPosMouse(270, 370, 150, 260) and confirmador == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
             if pygame.mouse.get_pressed()[0]:
                 confirmador = 1
@@ -349,7 +344,7 @@ while True:
             if contador%100 == 0:
                 verificaTiro, verifica = torreAtira(listaTorre1, bloco1, listaSoldado1, verificaTiro, verifica)
                 flecha, verifica = criaFlecha(vetorFlecha1[0], bloco1[0], bloco1[1])
-            #Flecha
+            #Flecha-B1
         if verifica == 0 and verificaTiro == 0:
 
             flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
@@ -363,7 +358,7 @@ while True:
             if contador%100 == 0:
                 verificaTiro, verifica = torreAtira(listaTorre2, bloco2, listaSoldado1, verificaTiro, verifica)
                 flecha, verifica = criaFlecha(vetorFlecha1[0], bloco2[0], bloco2[1])
-            #Flecha
+            #Flecha-B2
         if verifica == 0 and verificaTiro == 0:
 
             flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
@@ -376,12 +371,10 @@ while True:
             if contador%100 == 0:
                 verificaTiro, verifica = torreAtira(listaTorre3, bloco3, listaSoldado1, verificaTiro, verifica)
                 flecha, verifica = criaFlecha(vetorFlecha1[0], bloco3[0], bloco3[1])
-        #Flecha
+        #Flecha-B3
         if verifica == 0 and verificaTiro == 0:
 
             flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
-
-            print("EXECUTANDO")
             flecha.update()
         #Musica
         #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
