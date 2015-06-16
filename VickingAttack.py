@@ -1,5 +1,5 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
-"""Versão Atual:  v1.2.6.2"""
+"""Versão Atual:  v1.2.6.4"""
 #OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
@@ -204,13 +204,11 @@ while True:
         #background = GameImage("imagens\cenarios\cenario1.3.5.png") Mudar para a imagem do fundo!!
         #background.draw()
         janela.draw_text("Aperte Enter pra começar", 150, 200, 45, (255, 255, 255), "Arial", True, True)
-        janela.draw_text("v1.2.6.2", 0, 584, 15, (255, 255, 255), "Arial")
+        janela.draw_text("v1.2.6.4", 0, 584, 15, (255, 255, 255), "Arial")
         if teclado.key_pressed("enter"):
             Game_Estate = 1
         janela.update()
         return Game_Estate
-
-    #def restart():
 
     def criaFlecha(imagem, posX, posY):
         flecha = Sprite(imagem, 1)
@@ -254,7 +252,20 @@ while True:
             verifica = 1
             verificaTiro = 0
         return flecha, verifica, verificaTiro
-
+    def inimigoFinal(FatorDelta, listaInimigo, vetorSpritesInimigo, vetorVerificadoresInimigo): #Representa a criação final do inimigo, a função que será chamada no game loop
+        if listaInimigo[2] > 0:
+            listaInimigo[0].move_x(0)
+            listaInimigo[0].move_y(0)
+            listaInimigo[0].update()
+            listaInimigo[0].draw()
+            janela.draw_text(str(listaInimigo[2]), listaInimigo[0].x, listaInimigo[0].y, 12, (255, 0 , 0), "Arial", False)
+            #Movimentacao do Inimigo
+            posXSol1 = listaInimigo[0].x
+            posYSol1 = listaInimigo[0].y
+            velXSol1, velYSol1, Game_Estate = movimentacao(posXSol1, posYSol1, listaInimigo[0], listaInimigo[3], FatorDelta)
+            #Mudança de Animação do Inimigo
+            listaInimigo[0] = mudancaDeAnimacao(listaInimigo[0], velXSol1, velYSol1, vetorSpritesInimigo, vetorVerificadoresInimigo)
+        return listaInimigo
 
 
     #Principal
@@ -269,12 +280,12 @@ while True:
     #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
     soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
     vidaSol1 = 100
-    #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado]
-    listaSoldado1 = [soldado1, alturaSol1, vidaSol1]
+    velocidadeSol1 = 50
+    #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
+    listaSoldado1 = [soldado1, alturaSol1, vidaSol1, velocidadeSol1]
     vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
-    vetorSoldado2 =["imagens\soldado2\soldado2lado1.png", "imagens\soldado2\soldado2lado2.png", "imagens\soldado2\soldado2frente.png", "imagens\soldado2\soldado2costas.png"]
+    #vetorSoldado2 =["imagens\soldado2\soldado2lado1.png", "imagens\soldado2\soldado2lado2.png", "imagens\soldado2\soldado2frente.png", "imagens\soldado2\soldado2costas.png"]
     vetorVerificadoresSol1 = [0, 0, 0, 0]
-    velocidadeSol1 = 100
     #Musica
     musicaAtual = Sound("musicas\kingarthur.ogg")
     musicaAtual.set_volume(10)
@@ -303,6 +314,9 @@ while True:
     vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 0.5]
     flecha, verifica = criaFlecha(vetorFlecha1[0], 0, 0)
     verificaTiro = 1
+    ultimoTiroT1 = 0
+    ultimoTiroT2 = 0
+    ultimoTiroT3 = 0
     #GameLoop
     while Game_Estate != 3:
         if Game_Estate == 0:
@@ -312,7 +326,9 @@ while True:
                 Game_Estate = 2
              #Contador de frames
             contador = contador + 1
-            print(contador)
+            tempoAtual = janela.curr_time
+            tempoTotal = janela.time_elapsed()
+            print(tempoAtual, tempoTotal)
             if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
                 #por isso ao iniciar o jogo armazenamos o valor do deltaTime da máquina em que o código está sendo executado para que
                 #quando pausarmos o jogo usaremos esse valor.
@@ -322,6 +338,8 @@ while True:
             #Inimigos
 
             #Soldado1
+            inimigoFinal(deltaTime, listaSoldado1, vetorSoldado1, vetorVerificadoresSol1)
+            """
             if listaSoldado1[2] > 0:
 
 
@@ -336,16 +354,18 @@ while True:
                 velXSol1, velYSol1, Game_Estate = movimentacao(posXSol1, posYSol1, listaSoldado1[0], velocidadeSol1, deltaTime)
                     #Troca de animações do Soldado 1
                 listaSoldado1[0] = mudancaDeAnimacao(listaSoldado1[0], velXSol1, velYSol1, vetorSoldado1, vetorVerificadoresSol1)
+            """
             #torre(posXSol1, posYSol1)
             #Torres
-            ############BLOCO 1############
             #OBS! As torres devem estar dentro de uma condição que verifica se o alvo delas já foi abatido
+            ############BLOCO 1############
             if verificaPosMouse(270, 370, 150, 260) and confirmador == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
                 if pygame.mouse.get_pressed()[0]:
                     confirmador = 1
             if confirmador == 1:
                 listaTorre1[0].draw()
-                if contador%100 == 0:
+                if (janela.curr_time > ultimoTiroT1 +2000): #O 2000 é a taxa de disparo da torre, que deve ser atribuída depois
+                    ultimoTiroT1 = janela.curr_time
                     verificaTiro, verifica = torreAtira(listaTorre1, bloco1, listaSoldado1, verificaTiro, verifica)
                     flecha, verifica = criaFlecha(vetorFlecha1[0], bloco1[0], bloco1[1])
                 #Flecha-B1
