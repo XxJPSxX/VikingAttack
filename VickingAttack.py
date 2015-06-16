@@ -1,5 +1,6 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
-"""Versão Atual:  v1.2.6.4"""
+"""Versão Atual do Jogo"""
+versao = "v1.2.6.5" #Esta variável é utilizada no menu para exibir a versão
 #OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
@@ -159,7 +160,7 @@ while True:
         #Tem que converter para int, pois se não a comparação não funciona
         if int(listaAlvo[0].x) in range(areaX1, areaX2) and int(listaAlvo[0].y) in range(areaY1, areaY2):
             if listaAlvo[2] > 0:
-                listaAlvo[2] = listaAlvo[2] - listaTorre[4]
+                #listaAlvo[2] = listaAlvo[2] - listaTorre[3]
                 verificaColisao = 0
                 verificaTiro = 0
         else:
@@ -204,7 +205,7 @@ while True:
         #background = GameImage("imagens\cenarios\cenario1.3.5.png") Mudar para a imagem do fundo!!
         #background.draw()
         janela.draw_text("Aperte Enter pra começar", 150, 200, 45, (255, 255, 255), "Arial", True, True)
-        janela.draw_text("v1.2.6.4", 0, 584, 15, (255, 255, 255), "Arial")
+        janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial")
         if teclado.key_pressed("enter"):
             Game_Estate = 1
         janela.update()
@@ -218,7 +219,7 @@ while True:
         verifica = 0 #apenas para simplificar a primeira chamada
         return flecha, verifica
 
-    def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, verificaTiro): #Movimenta e muda a imagem do projetil
+    def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, verificaTiro, listaTorre): #Movimenta e muda a imagem do projetil
         if (verifica == 0):# and contador in range(100, 200): #MOVIMENTO PRIMITIVO DA FLECHA
             x = (flecha.x - listaSoldado1[0].x)
             y = (flecha.y - listaSoldado1[0].y)
@@ -248,7 +249,8 @@ while True:
             flecha.move_y(vely)
             flecha.draw()
             flecha.update()
-        if flecha.collided(vetorInimigo[0]):
+        if flecha.collided(vetorInimigo[0]): #OBS: A vida é retirada apenas quando ocorre a colisão, portanto às vezes a colisão falha e a vida não subtraída.
+            vetorInimigo[2] = vetorInimigo[2] - listaTorre[3]
             verifica = 1
             verificaTiro = 0
         return flecha, verifica, verificaTiro
@@ -267,10 +269,20 @@ while True:
             listaInimigo[0] = mudancaDeAnimacao(listaInimigo[0], velXSol1, velYSol1, vetorSpritesInimigo, vetorVerificadoresInimigo)
         return listaInimigo
 
-
-    #Principal
-    #Fundo
-
+    def torreFinal(conf, ultimoTiro, listaTorre, listaAlvo, bloco, verificaDisparo, listaProjetil, projetil, verificador): #Representa a criação final da torre, a função que será chamada no game loop
+        if verificaPosMouse(bloco[0]-60, bloco[0]+60, bloco[1]-60, bloco[1]+60) and conf== 0: #Precisa-se do confirmador para que só ative 1 vez a torre
+            if pygame.mouse.get_pressed()[0]:
+                conf = 1
+        if conf == 1:
+            listaTorre[0].draw()
+            if (janela.curr_time > ultimoTiro + listaTorre[4]) and listaAlvo[2] > 0:
+                ultimoTiro = janela.curr_time
+                verificaDisparo, verificador = torreAtira(listaTorre, bloco, listaAlvo, verificaDisparo, verificador)
+                projetil, verificador = criaFlecha(listaProjetil[0], bloco[0], bloco[1])
+        if verificador == 0 and verificaDisparo == 0:
+            projetil, verificador, verificaDisparo = movimentaEAtualizaProjetil(projetil, verificador, listaProjetil, listaAlvo, verificaDisparo, listaTorre)
+        projetil.update()
+        return conf, ultimoTiro, projetil, verificador, verificaDisparo
 
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
@@ -299,21 +311,25 @@ while True:
     bloco2 = [181, 388]
     bloco3 = [444, 378]
     spriteTorre1 = "imagens\Torres\TorrePedra.png" #Tive que definir o sprite antes
+    spriteTorre2 = "imagens\Torres\TorrePedra.png"
+    spriteTorre3 = "imagens\Torres\TorrePedra.png"
     torre1 = torre(spriteTorre1, bloco1)
-    torre2 = torre(spriteTorre1, bloco2)
-    torre3 = torre(spriteTorre1, bloco3)
+    torre2 = torre(spriteTorre2, bloco2)
+    torre3 = torre(spriteTorre3, bloco3)
+    #Define Flecha
+    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 1]
+    flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+    flechaT1, flechaT2, flechaT3 = flecha, flecha, flecha
+    verificaT1, verificaT2, verificaT3 = verifica, verifica, verifica
     #listaTorre = [objeto, alcanceX, alcanceY, taxaDeDisparo, dano]
-    listaTorre1 = [torre1, 100, 100, "??", 10] #VALORES DESTINADOS À TESTE
-    listaTorre2 = [torre2, 100, 100, "??", 10]
-    listaTorre3 = [torre3, 100, 100, "??", 10]
+    listaTorre1 = [torre1, 100, 100, 10, 2000] #VALORES DESTINADOS À TESTE
+    listaTorre2 = [torre2, 100, 100, 10, 2000]
+    listaTorre3 = [torre3, 100, 100, 10, 2000]
     confirmador = 0
     confirmador1 = 0
     confirmador2 = 0
     contador = 0
-    #Define Flecha
-    vetorFlecha1 = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 0.5]
-    flecha, verifica = criaFlecha(vetorFlecha1[0], 0, 0)
-    verificaTiro = 1
+    verificaTiroT1, verificaTiroT2, verificaTiroT3 = 1, 1, 1
     ultimoTiroT1 = 0
     ultimoTiroT2 = 0
     ultimoTiroT3 = 0
@@ -326,9 +342,6 @@ while True:
                 Game_Estate = 2
              #Contador de frames
             contador = contador + 1
-            tempoAtual = janela.curr_time
-            tempoTotal = janela.time_elapsed()
-            print(tempoAtual, tempoTotal)
             if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
                 #por isso ao iniciar o jogo armazenamos o valor do deltaTime da máquina em que o código está sendo executado para que
                 #quando pausarmos o jogo usaremos esse valor.
@@ -355,51 +368,13 @@ while True:
                     #Troca de animações do Soldado 1
                 listaSoldado1[0] = mudancaDeAnimacao(listaSoldado1[0], velXSol1, velYSol1, vetorSoldado1, vetorVerificadoresSol1)
             """
-            #torre(posXSol1, posYSol1)
             #Torres
-            #OBS! As torres devem estar dentro de uma condição que verifica se o alvo delas já foi abatido
-            ############BLOCO 1############
-            if verificaPosMouse(270, 370, 150, 260) and confirmador == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
-                if pygame.mouse.get_pressed()[0]:
-                    confirmador = 1
-            if confirmador == 1:
-                listaTorre1[0].draw()
-                if (janela.curr_time > ultimoTiroT1 +2000): #O 2000 é a taxa de disparo da torre, que deve ser atribuída depois
-                    ultimoTiroT1 = janela.curr_time
-                    verificaTiro, verifica = torreAtira(listaTorre1, bloco1, listaSoldado1, verificaTiro, verifica)
-                    flecha, verifica = criaFlecha(vetorFlecha1[0], bloco1[0], bloco1[1])
-                #Flecha-B1
-            if verifica == 0 and verificaTiro == 0:
-
-                flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
-
-            ############BLOCO 2############
-            if verificaPosMouse(bloco2[0]-60, bloco2[0]+60, bloco2[1]-60, bloco2[1]+60) and confirmador1 == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
-                if pygame.mouse.get_pressed()[0]:
-                    confirmador1 = 1
-            if confirmador1 == 1:
-                listaTorre2[0].draw()
-                if contador%100 == 0:
-                    verificaTiro, verifica = torreAtira(listaTorre2, bloco2, listaSoldado1, verificaTiro, verifica)
-                    flecha, verifica = criaFlecha(vetorFlecha1[0], bloco2[0], bloco2[1])
-                #Flecha-B2
-            if verifica == 0 and verificaTiro == 0:
-
-                flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
-            ############BLOCO 3############
-            if verificaPosMouse(bloco3[0]-60, bloco3[0]+60, bloco3[1]-60, bloco3[1]+60) and confirmador2 == 0: #Precisa-se do confirmador para que só ative 1 vez a torre
-                if pygame.mouse.get_pressed()[0]:
-                    confirmador2 = 1
-            if confirmador2 == 1:
-                listaTorre3[0].draw()
-                if contador%200 == 0:
-                    verificaTiro, verifica = torreAtira(listaTorre3, bloco3, listaSoldado1, verificaTiro, verifica)
-                    flecha, verifica = criaFlecha(vetorFlecha1[0], bloco3[0], bloco3[1])
-            #Flecha-B3
-            if verifica == 0 and verificaTiro == 0:
-
-                flecha, verifica, verificaTiro = movimentaEAtualizaProjetil(flecha, verifica, vetorFlecha1, listaSoldado1, verificaTiro)
-                flecha.update()
+                #Torre1
+            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, listaSoldado1, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1)
+                #Torre2
+            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, listaSoldado1, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2)
+                #Torre3
+            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, listaSoldado1, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3)
             #Musica
             #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
             #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
