@@ -186,6 +186,9 @@ while True:
         if teclado.key_pressed("space"):
             Game_Estate = 3
             musicaAtual.stop()
+        if teclado.key_pressed("i"):
+            print("ativado")
+            Game_Estate = 6
         janela.update()
         return Game_Estate
     def derrota():
@@ -204,8 +207,25 @@ while True:
     def verificaDeltaTime():
         global janela
         return janela.delta_time()
+
     #def dinheiro():
     #    coins = 0
+    def instrucoes():
+        Game_Estate = 5
+        background = GameImage("imagens\menus\instrucoes.png")
+        background.draw()
+        if teclado.key_pressed("escape"):
+            Game_Estate = 0
+        janela.update()
+        return Game_Estate
+    def instrucoes2():
+        Game_Estate = 6
+        background = GameImage("imagens\menus\instrucoes.png")
+        background.draw()
+        if teclado.key_pressed("escape"):
+            Game_Estate = 2
+        janela.update()
+        return Game_Estate
 
     def menu():
         Game_Estate = 0
@@ -214,6 +234,9 @@ while True:
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("enter"):
             Game_Estate = 1
+
+        if teclado.key_pressed("i"):
+            Game_Estate = 5
         janela.update()
         return Game_Estate
 
@@ -268,7 +291,6 @@ while True:
             listaInimigo[0].update()
             listaInimigo[0].draw()
             janela.draw_text(str(listaInimigo[2]), listaInimigo[0].x, listaInimigo[0].y, 12, (255, 0 , 0), "Arial", False)
-            print(listaInimigo[0].x, listaInimigo[0].y)
             #Movimentacao do Inimigo
             posXSol1 = listaInimigo[0].x
             posYSol1 = listaInimigo[0].y
@@ -336,40 +358,47 @@ while True:
     def waves():
         #Utilizade: definir previamente o conteúdo de todas as waves
         #waveX = [soldado0, soldado1, ...]
-        wave0 = [2, 2] #3 soldados0, 1 soldado1 ...
-        wave1 = [5, 2]
-        wave2 = [10, 4]
+        wave0 = [2, 0] #3 soldados0, 1 soldado1 ...
+        wave1 = [0, 2]
+        wave2 = [2, 0]
         todasWaves = [wave0, wave1, wave2]
         return todasWaves
 
-    def chamaWave(nWave, listaTIni, verificaFim, ultimoSpawn, conta):
+    def chamaWave(listaTIni, verificaFim, ultimoSpawn, conta, contWave, ultimaWave):
         #Utilidade: Chamar a função criaSoldado dependendo da Wave
-        #nWave = numero da wave
+        #nWave = numero da wave Atual
         #listaTIni é uma lista em que estão armazenados todos os inimigos spawnados
         #verificaFim é um verificador que checa se o ultimo inimigo foi spawnado, 0 = não foi spawnado | 1 = foi spawnado
         wavesTodas = waves()
-        waveDesejada = wavesTodas[nWave]
         soma1 = 0
         soma2 = 0
-        tempoDeEspaco = randint(800, 4000)
-        for i in range(len(waveDesejada)):
-            soma2 = soma2 + waveDesejada[i]
-            for j in range(waveDesejada[i]):
-                if i == 0 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[0] != waveDesejada[0]:
-                    ultimoSpawn = janela.curr_time
-                    conta[0] = conta[0] + 1
-                    criaSoldado(soldado0(), listaTIni)
-                if i == 1 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[1] != waveDesejada[1]:
-                    ultimoSpawn = janela.curr_time
-                    conta[1] = conta[1] + 1
-                    criaSoldado(soldado1(), listaTIni)
+        tempoDeEspaco = randint(1000, 4000)
+        espacoEntreWaves = 5000
+        waveDesejada = wavesTodas[contWave]
+        if janela.curr_time > ultimaWave + espacoEntreWaves:
+            for i in range(len(waveDesejada)):
+                soma2 = soma2 + waveDesejada[i] #Pega o numero de soldados que devem ser spawnados
+                for j in range(waveDesejada[i]):
+                    if i == 0 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[0] != waveDesejada[0]:
+                        ultimoSpawn = janela.curr_time
+                        conta[0] = conta[0] + 1
+                        criaSoldado(soldado0(), listaTIni)
+                    if i == 1 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[1] != waveDesejada[1]:
+                        ultimoSpawn = janela.curr_time
+                        conta[1] = conta[1] + 1
+                        criaSoldado(soldado1(), listaTIni)
         for i2 in range(len(conta)):
-            soma1 = soma1 + conta[i2]
-        if soma1 == soma2:
+            soma1 = soma1 + conta[i2] #Pega o numero de soldados que foram spawnados até agora
+        if soma1 == soma2  and janela.curr_time > ultimaWave + espacoEntreWaves:
+            if contWave < len(wavesTodas):
+                contWave = contWave +1
+                ultimaWave = janela.curr_time
+                conta = [0]*len(conta)
+                ultimoSpawn = 0
+        if contWave == len(wavesTodas):
             verificaFim = 1
         #Lógica: se a soma da quantidade de soldados que ainda faltam pra spawnar for = 0, acabou a wave
-        return verificaFim, ultimoSpawn
-
+        return verificaFim, ultimoSpawn, contWave, conta, ultimaWave
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
     pygame.display.set_icon(icone)
@@ -412,13 +441,18 @@ while True:
     ultimoTiroT1 = 0
     ultimoTiroT2 = 0
     ultimoTiroT3 = 0
+    contaWave = 0
     verificaFinal = 0
+    waveAtual = 1
     ultSpawn = 0
+    ultWave = 0
     contaSpawn = [0, 0]
+    tempoJanelaAtual = 0
     #Mouse
         #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
         #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
     pygame.mouse.set_cursor(*pygame.cursors.tri_left)
+    clock = pygame.time.Clock()
     #GameLoop
     while Game_Estate != 3:
         if Game_Estate == 0:
@@ -428,17 +462,28 @@ while True:
                 Game_Estate = 2
              #Contador de frames
             contador = contador + 1
-            if contador < 5: # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
+            """
+            if contador < 5:
+                deltaTime = verificaDeltaTime()
+                # Esta parte é necessária pois como dependemos do delta_time() para controlar a velocidade do personagem
                 #por isso ao iniciar o jogo armazenamos o valor do deltaTime da máquina em que o código está sendo executado para que
                 #quando pausarmos o jogo usaremos esse valor.
-                deltaTime = verificaDeltaTime()
+            """
+            deltaTime = verificaDeltaTime()
             janela.set_background_color((0, 0, 0))
             background.draw()
             #Inimigos
             #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
             if verificaFinal != 1:
-                verificaFinal, ultSpawn = chamaWave(0, listaTodosInimigos, verificaFinal, ultSpawn, contaSpawn)
+                verificaFinal, ultSpawn, contaWave, contaSpawn, ultWave= chamaWave(listaTodosInimigos, verificaFinal, ultSpawn, contaSpawn, contaWave, ultWave)
             atualizaInimigos(listaTodosInimigos)
+            waveAtual = contaWave +1
+            if contaWave+1 > len(waves()):
+                waveAtual = contaWave
+
+            janela.draw_text("Waves: "+str(waveAtual)+"/"+str(len(waves())), 0, 0, 15, (255, 255, 255), "Arial", True)
+            clock.tick()
+            janela.draw_text("FPS: " +str(int(clock.get_fps())), 700, 0, 15, (255, 255, 255), "Arial", True)
             #inimigoFinal(deltaTime, listaTodosInimigos[0][0], listaTodosInimigos[0][1], listaTodosInimigos[0][2])
             #Soldado1
             #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
@@ -457,3 +502,7 @@ while True:
             Game_Estate = pausa()
         if Game_Estate == 4:
             Game_Estate = derrota()
+        if Game_Estate == 5:
+            Game_Estate = instrucoes()
+        if Game_Estate == 6:
+            Game_Estate = instrucoes2()
