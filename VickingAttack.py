@@ -21,7 +21,7 @@ while True:
     alturaJanela = 600
     janela = Window(larguraFundo, alturaFundo)
     janela.set_title("Viking Attack")
-    janela.set_background_color((0, 0, 0))
+    janela.set_background_color((255, 255, 255))
     #Game_Estate
     Game_Estate = 0
     #Teclado
@@ -79,17 +79,17 @@ while True:
             objeto.move_y(-delta)
             velX = 0
             velY = -velocidadeObjeto
-        if int(posX) in range(631, 460, -1) and int(posY) in range(250, 260):
+        if int(posX) in range(635, 460, -1) and int(posY) in range(250, 260):
             objeto.move_x(-delta)
             objeto.move_y(0)
             velX = -velocidadeObjeto
             velY = 0
-        if int(posX) in range(460, 465) and int(posY) in range(261, 90, -1):
+        if int(posX) in range(450, 465) and int(posY) in range(261, 90, -1):
             objeto.move_x(0)
             objeto.move_y(-delta)
             velX = 0
             velY = -velocidadeObjeto
-        if int(posX) in range(460, 661) and int(posY) in range(90, 105):
+        if int(posX) in range(450, 661) and int(posY) in range(80, 105):
             objeto.move_x(delta)
             objeto.move_y(0)
             velX = velocidadeObjeto
@@ -177,15 +177,23 @@ while True:
 
     def pausa():
         Game_Estate = 2
-        janela.draw_text("Aperte Enter pra sair da Pausa",110,200,45,(255,255,255),"Arial",True,True)
+        background = GameImage("imagens\menus\pausa.png")
+        background.draw()
+        janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
 
         if teclado.key_pressed("enter"):
             Game_Estate = 1
+        if teclado.key_pressed("space"):
+            Game_Estate = 3
+            musicaAtual.stop()
         janela.update()
         return Game_Estate
     def derrota():
+
         Game_Estate = 4
-        janela.draw_text("Aperte Esc Pra sair, ou Enter pra Reiniciar",0,0,30,(255,255,255),"Arial",True,True)
+        background = GameImage("imagens\menus\perdeu.png")
+        background.draw()
+        janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("escape"):
             janela.close()
         if teclado.key_pressed("enter"):
@@ -199,13 +207,11 @@ while True:
     #def dinheiro():
     #    coins = 0
 
-
     def menu():
         Game_Estate = 0
-        #background = GameImage("imagens\cenarios\cenario1.3.5.png") Mudar para a imagem do fundo!!
-        #background.draw()
-        janela.draw_text("Aperte Enter pra começar", 150, 200, 45, (255, 255, 255), "Arial", True, True)
-        janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial")
+        background = GameImage("imagens\menus\iniciar.png")
+        background.draw()
+        janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("enter"):
             Game_Estate = 1
         janela.update()
@@ -219,10 +225,10 @@ while True:
         verifica = 0 #apenas para simplificar a primeira chamada
         return flecha, verifica
 
-    def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, verificaTiro, listaTorre): #Movimenta e muda a imagem do projetil
+    def movimentaEAtualizaProjetil(flecha, verifica, vetorProjetil, vetorInimigo, verificaTiro, listaTorre, deltaT): #Movimenta e muda a imagem do projetil
         if (verifica == 0):# and contador in range(100, 200): #MOVIMENTO PRIMITIVO DA FLECHA
-            x = (flecha.x - listaSoldado1[0].x)
-            y = (flecha.y - listaSoldado1[0].y)
+            x = (flecha.x - vetorInimigo[0].x)
+            y = (flecha.y - vetorInimigo[0].y)
             proporcao = x/y
             if proporcao < 0:
                 proporcao = -proporcao
@@ -244,7 +250,8 @@ while True:
                 flecha, verifica = criaFlecha(vetorProjetil[2], flecha.x, flecha.y) # <\
             if velx > 0 and vely < 0:
                 flecha, verifica = criaFlecha(vetorProjetil[3], flecha.x, flecha.y) # />
-
+            velx = velx * deltaT
+            vely = vely * deltaT
             flecha.move_x(velx)
             flecha.move_y(vely)
             flecha.draw()
@@ -261,6 +268,7 @@ while True:
             listaInimigo[0].update()
             listaInimigo[0].draw()
             janela.draw_text(str(listaInimigo[2]), listaInimigo[0].x, listaInimigo[0].y, 12, (255, 0 , 0), "Arial", False)
+            print(listaInimigo[0].x, listaInimigo[0].y)
             #Movimentacao do Inimigo
             posXSol1 = listaInimigo[0].x
             posYSol1 = listaInimigo[0].y
@@ -269,7 +277,7 @@ while True:
             listaInimigo[0] = mudancaDeAnimacao(listaInimigo[0], velXSol1, velYSol1, vetorSpritesInimigo, vetorVerificadoresInimigo)
         return listaInimigo
 
-    def torreFinal(conf, ultimoTiro, listaTorre, listaAlvo, bloco, verificaDisparo, listaProjetil, projetil, verificador): #Representa a criação final da torre, a função que será chamada no game loop
+    def torreFinal(conf, ultimoTiro, listaTorre, listaAlvo, bloco, verificaDisparo, listaProjetil, projetil, verificador, timeDelta): #Representa a criação final da torre, a função que será chamada no game loop
         if verificaPosMouse(bloco[0]-60, bloco[0]+60, bloco[1]-60, bloco[1]+60) and conf== 0: #Precisa-se do confirmador para que só ative 1 vez a torre
             if pygame.mouse.get_pressed()[0]:
                 conf = 1
@@ -280,31 +288,102 @@ while True:
                 verificaDisparo, verificador = torreAtira(listaTorre, bloco, listaAlvo, verificaDisparo, verificador)
                 projetil, verificador = criaFlecha(listaProjetil[0], bloco[0], bloco[1])
         if verificador == 0 and verificaDisparo == 0:
-            projetil, verificador, verificaDisparo = movimentaEAtualizaProjetil(projetil, verificador, listaProjetil, listaAlvo, verificaDisparo, listaTorre)
+            projetil, verificador, verificaDisparo = movimentaEAtualizaProjetil(projetil, verificador, listaProjetil, listaAlvo, verificaDisparo, listaTorre, timeDelta)
         projetil.update()
         return conf, ultimoTiro, projetil, verificador, verificaDisparo
+
+    def soldado0():
+        #Utilidade: Definir previamente o soldado tipo 0
+        #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
+        soldadoSprite0, alturaSol0 = inimigo("imagens\soldado0\soldado0lado1.png", 9, 0, 9, 1000, 0, 140)
+        vidaSol0 = 100
+        velocidadeSol0 = 50
+        #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
+        listaSol0 = [soldadoSprite0, alturaSol0, vidaSol0, velocidadeSol0]
+        vetorSol0 =["imagens\soldado0\soldado0lado1.png", "imagens\soldado0\soldado0lado2.png", "imagens\soldado0\soldado0frente.png", "imagens\soldado0\soldado0costas.png"]
+        vetVerificadoresSol0 = [0, 0, 0, 0]
+        return listaSol0, vetorSol0, vetVerificadoresSol0
+    def soldado1():
+        #Utilidade: Definir previamente o soldado tipo 1
+        #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
+        soldadoSprite1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
+        vidaSol1 = 300
+        velocidadeSol1 = 70
+        #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
+        listaSol1 = [soldadoSprite1, alturaSol1, vidaSol1, velocidadeSol1]
+        vetorSol1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
+        vetVerificadoresSol1 = [0, 0, 0, 0]
+        return listaSol1, vetorSol1, vetVerificadoresSol1
+
+    def criaSoldado(soldadoX, listaTodosIni):
+        #Armazenar em uma lista todos os inimigos da fase(OBS: esses inimigos serão removidos conforme forem sendo eliminados)
+        listaSoldadosY, vetorSoldadoY, vetorVerificadoresSolY = soldadoX
+        vetorSoldadoAtual = [listaSoldadosY, vetorSoldadoY, vetorVerificadoresSolY]
+        listaTodosIni.append(vetorSoldadoAtual)
+        #Como essa função é chamada apenas após os frames iniciais, pode-se utilizar o deltaTime, mas é recomendado criar uma
+        #restrição para o chamador das waves para chamar apenas após o contador 5
+        return listaTodosIni
+
+    def atualizaInimigos(vetorTodosOsInimigos):
+        #Atualiza todos os inimigos presentes no vetorTodosOsInimigos, que é o vetor que contém todos os inimigos da fase
+        for w in range(len(vetorTodosOsInimigos)):
+            listaSoldadoW = vetorTodosOsInimigos[w][0]
+            vetorSoldadoW = vetorTodosOsInimigos[w][1]
+            vetorVerificaSolW = vetorTodosOsInimigos[w][2]
+            inimigoFinal(deltaTime, listaSoldadoW, vetorSoldadoW, vetorVerificaSolW)
+        return
+
+    def waves():
+        #Utilizade: definir previamente o conteúdo de todas as waves
+        #waveX = [soldado0, soldado1, ...]
+        wave0 = [2, 2] #3 soldados0, 1 soldado1 ...
+        wave1 = [5, 2]
+        wave2 = [10, 4]
+        todasWaves = [wave0, wave1, wave2]
+        return todasWaves
+
+    def chamaWave(nWave, listaTIni, verificaFim, ultimoSpawn, conta):
+        #Utilidade: Chamar a função criaSoldado dependendo da Wave
+        #nWave = numero da wave
+        #listaTIni é uma lista em que estão armazenados todos os inimigos spawnados
+        #verificaFim é um verificador que checa se o ultimo inimigo foi spawnado, 0 = não foi spawnado | 1 = foi spawnado
+        wavesTodas = waves()
+        waveDesejada = wavesTodas[nWave]
+        soma1 = 0
+        soma2 = 0
+        tempoDeEspaco = randint(800, 4000)
+        for i in range(len(waveDesejada)):
+            soma2 = soma2 + waveDesejada[i]
+            for j in range(waveDesejada[i]):
+                if i == 0 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[0] != waveDesejada[0]:
+                    ultimoSpawn = janela.curr_time
+                    conta[0] = conta[0] + 1
+                    criaSoldado(soldado0(), listaTIni)
+                if i == 1 and janela.curr_time > ultimoSpawn + tempoDeEspaco and conta[1] != waveDesejada[1]:
+                    ultimoSpawn = janela.curr_time
+                    conta[1] = conta[1] + 1
+                    criaSoldado(soldado1(), listaTIni)
+        for i2 in range(len(conta)):
+            soma1 = soma1 + conta[i2]
+        if soma1 == soma2:
+            verificaFim = 1
+        #Lógica: se a soma da quantidade de soldados que ainda faltam pra spawnar for = 0, acabou a wave
+        return verificaFim, ultimoSpawn
 
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
     pygame.display.set_icon(icone)
     #Inimigos
+    listaTodosInimigos = [] #é uma lista em que estão armazenados todos os inimigos spawnados
         #Soldado1
     #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
-    soldado1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
-    vidaSol1 = 100
-    velocidadeSol1 = 50
-    #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
-    listaSoldado1 = [soldado1, alturaSol1, vidaSol1, velocidadeSol1]
-    vetorSoldado1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
-    #vetorSoldado2 =["imagens\soldado2\soldado2lado1.png", "imagens\soldado2\soldado2lado2.png", "imagens\soldado2\soldado2frente.png", "imagens\soldado2\soldado2costas.png"]
-    vetorVerificadoresSol1 = [0, 0, 0, 0]
+    listaSoldado0, vetorSoldado0, vetorVerificadoresSol0 = soldado0()
+    listaSoldado1, vetorSoldado1, vetorVerificadoresSol1 = soldado1()
     #Musica
     musicaAtual = Sound("musicas\kingarthur.ogg")
     musicaAtual.set_volume(10)
     musicaAtual.play()
-    #Waves (APENAS PARA TESTE)
-    wave1 = 3000
-    wave2 = 4000
+    #Waves
     #Torres
         #Centros dos Blocos de Inserção(aproximado)
     bloco1 = [322, 212]
@@ -317,14 +396,14 @@ while True:
     torre2 = torre(spriteTorre2, bloco2)
     torre3 = torre(spriteTorre3, bloco3)
     #Define Flecha
-    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 1]
+    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 100]
     flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
     flechaT1, flechaT2, flechaT3 = flecha, flecha, flecha
     verificaT1, verificaT2, verificaT3 = verifica, verifica, verifica
-    #listaTorre = [objeto, alcanceX, alcanceY, taxaDeDisparo, dano]
-    listaTorre1 = [torre1, 100, 100, 10, 2000] #VALORES DESTINADOS À TESTE
-    listaTorre2 = [torre2, 100, 100, 10, 2000]
-    listaTorre3 = [torre3, 100, 100, 10, 2000]
+    #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+    listaTorre1 = [torre1, 150, 150, 10, 2000] #VALORES DESTINADOS À TESTE
+    listaTorre2 = [torre2, 150, 150, 10, 2000]
+    listaTorre3 = [torre3, 150, 150, 10, 2000]
     confirmador = 0
     confirmador1 = 0
     confirmador2 = 0
@@ -333,6 +412,13 @@ while True:
     ultimoTiroT1 = 0
     ultimoTiroT2 = 0
     ultimoTiroT3 = 0
+    verificaFinal = 0
+    ultSpawn = 0
+    contaSpawn = [0, 0]
+    #Mouse
+        #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
+        #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
+    pygame.mouse.set_cursor(*pygame.cursors.tri_left)
     #GameLoop
     while Game_Estate != 3:
         if Game_Estate == 0:
@@ -349,39 +435,23 @@ while True:
             janela.set_background_color((0, 0, 0))
             background.draw()
             #Inimigos
-
+            #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
+            if verificaFinal != 1:
+                verificaFinal, ultSpawn = chamaWave(0, listaTodosInimigos, verificaFinal, ultSpawn, contaSpawn)
+            atualizaInimigos(listaTodosInimigos)
+            #inimigoFinal(deltaTime, listaTodosInimigos[0][0], listaTodosInimigos[0][1], listaTodosInimigos[0][2])
             #Soldado1
-            inimigoFinal(deltaTime, listaSoldado1, vetorSoldado1, vetorVerificadoresSol1)
-            """
-            if listaSoldado1[2] > 0:
-
-
-                listaSoldado1[0].move_x(0)
-                listaSoldado1[0].move_y(0)
-                listaSoldado1[0].update()
-                listaSoldado1[0].draw()
-                janela.draw_text(str(listaSoldado1[2]), listaSoldado1[0].x, listaSoldado1[0].y, 12, (255, 0 , 0), "Arial", False)
-                    #Movimentacao do Soldado 1
-                posXSol1 = listaSoldado1[0].x
-                posYSol1 = listaSoldado1[0].y
-                velXSol1, velYSol1, Game_Estate = movimentacao(posXSol1, posYSol1, listaSoldado1[0], velocidadeSol1, deltaTime)
-                    #Troca de animações do Soldado 1
-                listaSoldado1[0] = mudancaDeAnimacao(listaSoldado1[0], velXSol1, velYSol1, vetorSoldado1, vetorVerificadoresSol1)
-            """
+            #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
             #Torres
                 #Torre1
-            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, listaSoldado1, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1)
+            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, listaSoldado0, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1, deltaTime)
                 #Torre2
-            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, listaSoldado1, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2)
+            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, listaSoldado0, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2, deltaTime)
                 #Torre3
-            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, listaSoldado1, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3)
+            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, listaSoldado0, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3, deltaTime)
             #Musica
             #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
             #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
-            #Mouse
-                #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
-                #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
-            pygame.mouse.set_cursor(*pygame.cursors.tri_left)
             janela.update()
         if Game_Estate == 2:
             Game_Estate = pausa()
