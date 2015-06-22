@@ -277,9 +277,10 @@ while True:
             vely = vely * deltaT
             flecha.move_x(velx)
             flecha.move_y(vely)
-            flecha.draw()
-            flecha.update()
-        if flecha.collided(vetorInimigo[0]): #OBS: A vida é retirada apenas quando ocorre a colisão, portanto às vezes a colisão falha e a vida não subtraída.
+            if vetorInimigo[2] > 0: #Proteção
+                flecha.draw()
+                flecha.update()
+        if flecha.collided(vetorInimigo[0]):# or vetorInimigo[2] < 1: #OBS: A vida é retirada apenas quando ocorre a colisão, portanto às vezes a colisão falha e a vida não subtraída.
             vetorInimigo[2] = vetorInimigo[2] - listaTorre[3]
             verifica = 1
             verificaTiro = 0
@@ -320,8 +321,9 @@ while True:
         soldadoSprite0, alturaSol0 = inimigo("imagens\soldado0\soldado0lado1.png", 9, 0, 9, 1000, 0, 140)
         vidaSol0 = 100
         velocidadeSol0 = 50
+        valorEmMoedas = 25
         #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
-        listaSol0 = [soldadoSprite0, alturaSol0, vidaSol0, velocidadeSol0]
+        listaSol0 = [soldadoSprite0, alturaSol0, vidaSol0, velocidadeSol0, valorEmMoedas]
         vetorSol0 =["imagens\soldado0\soldado0lado1.png", "imagens\soldado0\soldado0lado2.png", "imagens\soldado0\soldado0frente.png", "imagens\soldado0\soldado0costas.png"]
         vetVerificadoresSol0 = [0, 0, 0, 0]
         return listaSol0, vetorSol0, vetVerificadoresSol0
@@ -331,11 +333,25 @@ while True:
         soldadoSprite1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
         vidaSol1 = 300
         velocidadeSol1 = 70
+        valorEmMoedas = 100
         #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
-        listaSol1 = [soldadoSprite1, alturaSol1, vidaSol1, velocidadeSol1]
+        listaSol1 = [soldadoSprite1, alturaSol1, vidaSol1, velocidadeSol1, valorEmMoedas]
         vetorSol1 =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
         vetVerificadoresSol1 = [0, 0, 0, 0]
         return listaSol1, vetorSol1, vetVerificadoresSol1
+
+    def soldadoFake():
+        #Utilidade: Definir um soldado que está fora da área de alcance de qualquer torre, para que seja apenas um valor temporário para o alvo da torre
+        #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
+        soldadoSpriteFake, alturaSolFake = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, -140)
+        vidaSolFake = 3000
+        velocidadeSolFake = 70
+        valorEmMoedas = 0
+        #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
+        listaSolFake = [soldadoSpriteFake, alturaSolFake, vidaSolFake, velocidadeSolFake, valorEmMoedas]
+        vetorSolFake =["imagens\soldado1\soldado1lado1.png", "imagens\soldado1\soldado1lado2.png", "imagens\soldado1\soldado1frente.png", "imagens\soldado1\soldado1costas.png"]
+        vetVerificadoresSolFake = [0, 0, 0, 0]
+        return listaSolFake
 
     def criaSoldado(soldadoX, listaTodosIni):
         #Armazenar em uma lista todos os inimigos da fase(OBS: esses inimigos serão removidos conforme forem sendo eliminados)
@@ -399,6 +415,30 @@ while True:
             verificaFim = 1
         #Lógica: se a soma da quantidade de soldados que ainda faltam pra spawnar for = 0, acabou a wave
         return verificaFim, ultimoSpawn, contWave, conta, ultimaWave
+
+    def selecionaAlvo(lisTodosInimigos, bloco, listaTorre):
+        areaX1 = bloco[0] - listaTorre[1]
+        areaX2 = bloco[0] + listaTorre[1]
+        areaY2 = bloco[1] + listaTorre[2]
+        listaAlvos = []
+        for soldado in range(len(lisTodosInimigos)):
+            areaY1 = (bloco[1] - listaTorre[2])-lisTodosInimigos[soldado][0][0].height
+            if int(lisTodosInimigos[soldado][0][0].x) in range(areaX1, areaX2) and int(lisTodosInimigos[soldado][0][0].y) in range(areaY1, areaY2):
+                listaAlvos.append(lisTodosInimigos[soldado][0])
+        if listaAlvos == []:
+            listaSoldadoFake = soldadoFake()
+            return listaSoldadoFake
+        else:
+            return listaAlvos[0]
+
+    def destroiInimigos(lsTodosIni, quantidadeMoedas):
+        for inimigo in range(len(lsTodosIni)):
+            if lsTodosIni[inimigo][0][2] < 1:
+                lsTodosIni.remove(lsTodosIni[inimigo]) #Remove o inimigo morto da lista de inimigos
+                quantidadeMoedas = quantidadeMoedas +  lsTodosIni[inimigo][0][4] #Soma a quantidade de moedas que é o valor do inimigo
+                break
+        return lsTodosIni, quantidadeMoedas
+
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
     pygame.display.set_icon(icone)
@@ -425,7 +465,7 @@ while True:
     torre2 = torre(spriteTorre2, bloco2)
     torre3 = torre(spriteTorre3, bloco3)
     #Define Flecha
-    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 100]
+    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 200]
     flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
     flechaT1, flechaT2, flechaT3 = flecha, flecha, flecha
     verificaT1, verificaT2, verificaT3 = verifica, verifica, verifica
@@ -448,6 +488,9 @@ while True:
     ultWave = 0
     contaSpawn = [0, 0]
     tempoJanelaAtual = 0
+    moeda = GameImage("imagens\moeda.png")
+    moeda.set_position(75, 0)
+    qtdMoedas = 0
     #Mouse
         #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
         #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
@@ -482,6 +525,8 @@ while True:
                 waveAtual = contaWave
 
             janela.draw_text("Waves: "+str(waveAtual)+"/"+str(len(waves())), 0, 0, 15, (255, 255, 255), "Arial", True)
+            moeda.draw()
+            janela.draw_text("Moedas: "+str(qtdMoedas), 100, 0, 15, (255, 255, 255), "Arial", True)
             clock.tick()
             janela.draw_text("FPS: " +str(int(clock.get_fps())), 700, 0, 15, (255, 255, 255), "Arial", True)
             #inimigoFinal(deltaTime, listaTodosInimigos[0][0], listaTodosInimigos[0][1], listaTodosInimigos[0][2])
@@ -489,11 +534,16 @@ while True:
             #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
             #Torres
                 #Torre1
-            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, listaSoldado0, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1, deltaTime)
+            AlvoT1 = selecionaAlvo(listaTodosInimigos, bloco1, listaTorre1)
+            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, AlvoT1, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1, deltaTime)
                 #Torre2
-            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, listaSoldado0, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2, deltaTime)
+            AlvoT2 = selecionaAlvo(listaTodosInimigos, bloco2, listaTorre2)
+            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, AlvoT2, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2, deltaTime)
                 #Torre3
-            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, listaSoldado0, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3, deltaTime)
+            AlvoT3 = selecionaAlvo(listaTodosInimigos, bloco3, listaTorre3)
+            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, AlvoT3, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3, deltaTime)
+            listaTodosInimigos, qtdMoedas = destroiInimigos(listaTodosInimigos, qtdMoedas) #Esta função retira os inimigos da lista que contém todos eles
+
             #Musica
             #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
             #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
