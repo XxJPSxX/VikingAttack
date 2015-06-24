@@ -1,6 +1,6 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
 """Versão Atual do Jogo"""
-versao = "v1.2.6.5" #Esta variável é utilizada no menu para exibir a versão
+versao = "v1.2.8.1" #Esta variável é utilizada no menu para exibir a versão
 #OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
@@ -22,12 +22,11 @@ while True:
     janela = Window(larguraFundo, alturaFundo)
     janela.set_title("Viking Attack")
     janela.set_background_color((255, 255, 255))
-    #Game_Estate
-    Game_Estate = 0
+    #Game_State
+    Game_State = 0
     #Teclado
     teclado = janela.get_keyboard()
     #Subprogramas
-
     def inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY):
         #animacao = total de imagens da animacao
         #animacaoInicial = quadro inicial da animacao
@@ -43,7 +42,7 @@ while True:
     def movimentacao(posX, posY, objeto, velocidadeObjeto, deltaTime):
         #Condições diferentes para cada cenário, tais coordenadas valem para o cenário 1.3.5
         #Troca de animação dependendo da direção do movimento(A fazer...)
-        global Game_Estate
+        global Game_State
         velX = 0
         velY = 0
         resp = 0
@@ -95,8 +94,8 @@ while True:
             velX = velocidadeObjeto
             velY = 0
         if int(posX) in range(661, 670) and int(posY) in range(90, 105):
-            Game_Estate = 4
-        return velX, velY, Game_Estate
+            Game_State = 4
+        return velX, velY, Game_State
 
     def mudancaDeAnimacao(objeto, velX, velY, vetorSprites, verificadorObj):
         posX = 0
@@ -176,34 +175,33 @@ while True:
         return False
 
     def pausa():
-        Game_Estate = 2
+        Game_State = 2
         background = GameImage("imagens\menus\pausa.png")
         background.draw()
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
 
         if teclado.key_pressed("enter"):
-            Game_Estate = 1
+            Game_State = 1
         if teclado.key_pressed("space"):
-            Game_Estate = 3
+            Game_State = 3
             musicaAtual.stop()
         if teclado.key_pressed("i"):
-            print("ativado")
-            Game_Estate = 6
+            Game_State = 6
         janela.update()
-        return Game_Estate
+        return Game_State
     def derrota():
 
-        Game_Estate = 4
+        Game_State = 4
         background = GameImage("imagens\menus\perdeu.png")
         background.draw()
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("escape"):
             janela.close()
         if teclado.key_pressed("enter"):
-            Game_Estate = 3
+            Game_State = 3
             musicaAtual.stop() #Sem isso a música começa a tocar novamente encima da outra
         janela.update()
-        return Game_Estate
+        return Game_State
     def verificaDeltaTime():
         global janela
         return janela.delta_time()
@@ -211,34 +209,34 @@ while True:
     #def dinheiro():
     #    coins = 0
     def instrucoes():
-        Game_Estate = 5
+        Game_State = 5
         background = GameImage("imagens\menus\instrucoes.png")
         background.draw()
         if teclado.key_pressed("escape"):
-            Game_Estate = 0
+            Game_State = 0
         janela.update()
-        return Game_Estate
+        return Game_State
     def instrucoes2():
-        Game_Estate = 6
+        Game_State = 6
         background = GameImage("imagens\menus\instrucoes.png")
         background.draw()
         if teclado.key_pressed("escape"):
-            Game_Estate = 2
+            Game_State = 2
         janela.update()
-        return Game_Estate
+        return Game_State
 
     def menu():
-        Game_Estate = 0
+        Game_State = 0
         background = GameImage("imagens\menus\iniciar.png")
         background.draw()
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("enter"):
-            Game_Estate = 1
+            Game_State = 1
 
         if teclado.key_pressed("i"):
-            Game_Estate = 5
+            Game_State = 5
         janela.update()
-        return Game_Estate
+        return Game_State
 
     def criaFlecha(imagem, posX, posY):
         flecha = Sprite(imagem, 1)
@@ -277,7 +275,8 @@ while True:
             vely = vely * deltaT
             flecha.move_x(velx)
             flecha.move_y(vely)
-            if vetorInimigo[2] > 0: #Proteção
+            if vetorInimigo[2] > 0 and vetorInimigo[3] != 0: #Proteção, verifica se a vida é maior do que 0 e se não é
+                #o soldado fake!
                 flecha.draw()
                 flecha.update()
         if flecha.collided(vetorInimigo[0]):# or vetorInimigo[2] < 1: #OBS: A vida é retirada apenas quando ocorre a colisão, portanto às vezes a colisão falha e a vida não subtraída.
@@ -295,7 +294,7 @@ while True:
             #Movimentacao do Inimigo
             posXSol1 = listaInimigo[0].x
             posYSol1 = listaInimigo[0].y
-            velXSol1, velYSol1, Game_Estate = movimentacao(posXSol1, posYSol1, listaInimigo[0], listaInimigo[3], FatorDelta)
+            velXSol1, velYSol1, Game_State = movimentacao(posXSol1, posYSol1, listaInimigo[0], listaInimigo[3], FatorDelta)
             #Mudança de Animação do Inimigo
             listaInimigo[0] = mudancaDeAnimacao(listaInimigo[0], velXSol1, velYSol1, vetorSpritesInimigo, vetorVerificadoresInimigo)
         return listaInimigo
@@ -345,7 +344,7 @@ while True:
         #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
         soldadoSpriteFake, alturaSolFake = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, -140)
         vidaSolFake = 3000
-        velocidadeSolFake = 70
+        velocidadeSolFake = 0
         valorEmMoedas = 0
         #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
         listaSolFake = [soldadoSpriteFake, alturaSolFake, vidaSolFake, velocidadeSolFake, valorEmMoedas]
@@ -425,6 +424,7 @@ while True:
             areaY1 = (bloco[1] - listaTorre[2])-lisTodosInimigos[soldado][0][0].height
             if int(lisTodosInimigos[soldado][0][0].x) in range(areaX1, areaX2) and int(lisTodosInimigos[soldado][0][0].y) in range(areaY1, areaY2):
                 listaAlvos.append(lisTodosInimigos[soldado][0])
+                break
         if listaAlvos == []:
             listaSoldadoFake = soldadoFake()
             return listaSoldadoFake
@@ -497,12 +497,12 @@ while True:
     pygame.mouse.set_cursor(*pygame.cursors.tri_left)
     clock = pygame.time.Clock()
     #GameLoop
-    while Game_Estate != 3:
-        if Game_Estate == 0:
-            Game_Estate = menu()
-        if Game_Estate == 1:
+    while Game_State != 3:
+        if Game_State == 0:
+            Game_State = menu()
+        if Game_State == 1:
             if teclado.key_pressed("escape"):
-                Game_Estate = 2
+                Game_State = 2
              #Contador de frames
             contador = contador + 1
             """
@@ -548,11 +548,11 @@ while True:
             #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
             #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
             janela.update()
-        if Game_Estate == 2:
-            Game_Estate = pausa()
-        if Game_Estate == 4:
-            Game_Estate = derrota()
-        if Game_Estate == 5:
-            Game_Estate = instrucoes()
-        if Game_Estate == 6:
-            Game_Estate = instrucoes2()
+        if Game_State == 2:
+            Game_State = pausa()
+        if Game_State == 4:
+            Game_State = derrota()
+        if Game_State == 5:
+            Game_State = instrucoes()
+        if Game_State == 6:
+            Game_State = instrucoes2()
