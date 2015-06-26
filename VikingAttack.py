@@ -439,6 +439,22 @@ while True:
                 break
         return lsTodosIni, quantidadeMoedas
 
+    def telaDeUpgrade(qtdMoedasAtual, Tower_State):
+        #Utilidade: Esta tela irá pausar o jogo e irá disponibilizar as opções de torres para fazer upgrade dependendo do
+        #Tower_State, que Tower_State = 0(significa que o bloco de inserção está vazio), Tower_State = 1(significa que o bloco
+        #está com a torre tipo 1 em sua posição... Durante esta tela o usuário decide o que fazer, sua decisão deve ser passada
+        #retornando o dinheiro atual, visto que o usuário pode ter consumido parte do dinheiro anterior e também o Tower_State
+        #para que seja sabido qual torre que deve aparecer.
+        #DICA: os números 0, 1, 2... do Tower_State podem também ser utilizados para referenciar diferentes torres dentro de um
+        #vetor ainda não criado de torres
+
+        Game_State = 7
+        background = GameImage("imagens\menus\Torres.png")
+        if teclado.key_pressed("escape"): #Volta para o jogo
+            Game_State = 1
+
+
+        return Game_State, qtdMoedasAtual, Tower_State
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
     pygame.display.set_icon(icone)
