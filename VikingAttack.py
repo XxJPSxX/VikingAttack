@@ -440,6 +440,7 @@ while True:
         return lsTodosIni, quantidadeMoedas
 
     def telaDeUpgrade(qtdMoedasAtual, Tower_State):
+        Game_State = 7
         #Utilidade: Esta tela irá pausar o jogo e irá disponibilizar as opções de torres para fazer upgrade dependendo do
         #Tower_State, que Tower_State = 0(significa que o bloco de inserção está vazio), Tower_State = 1(significa que o bloco
         #está com a torre tipo 1 em sua posição... Durante esta tela o usuário decide o que fazer, sua decisão deve ser passada
@@ -447,13 +448,74 @@ while True:
         #para que seja sabido qual torre que deve aparecer.
         #DICA: os números 0, 1, 2... do Tower_State podem também ser utilizados para referenciar diferentes torres dentro de um
         #vetor ainda não criado de torres
-
+        #Quando uma torre está disponível para venda ela deve-se dar o draw da imagem dela na telaDeUpgrade, se ela não está
+        #disponível deve-se dar o draw da imagem em preto e branco dela, para sinalizar que aquela torre não está disponível.
+        #Tower_State = 0 Significa que está vazio --> "imagens\menus\Cadeados\Cadeados0.png"
+        #Tower_State = 1 Significa que está com a Torre 1 --> "imagens\menus\Cadeados\Cadeados1.png"
+        #assim por diante
         Game_State = 7
         background = GameImage("imagens\menus\Torres.png")
-        if teclado.key_pressed("escape"): #Volta para o jogo
+        background.draw()
+        moeda.draw()
+        janela.draw_text("Moedas: "+str(qtdMoedas), 100, 0, 15, (255, 255, 255), "Arial", True)
+        if Tower_State == 0:
+            if qtdMoedasAtual < 100: #Neste caso não tem dinheiro para comprar nenhuma torre e não tem nenhuma torre
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados0.png")
+                cadeados.draw()
+            else: #Neste caso tem-se dinheiro suficiente para comprar a próxima torre
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados1.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+        elif Tower_State == 1:
+            if qtdMoedasAtual < 150:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados1.png")
+                cadeados.draw()
+            else:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados2.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+
+        elif Tower_State == 2:
+            if qtdMoedasAtual < 250:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados2.png")
+                cadeados.draw()
+            else:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados3.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+        elif Tower_State == 3:
+            if qtdMoedasAtual < 300:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados3.png")
+                cadeados.draw()
+            else:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados4.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+        elif Tower_State == 4:
+            if qtdMoedasAtual < 350:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados4.png")
+                cadeados.draw()
+            else:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados5.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+        elif Tower_State == 5:
+            if qtdMoedasAtual < 400:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados5.png")
+                cadeados.draw()
+            elif qtdMoedasAtual >= 400 and qtdMoedasAtual < 500:
+                cadeados = GameImage("imagens\menus\Cadeados\Cadeados6.png")
+                cadeados.draw()
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+            elif qtdMoedasAtual > 500:
+                temp = 1
+                #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
+                #Tem todos os pre requizitos para a ultima torre.
+                #Não precisa desenhar cadeado nenhum, apenas verificar se vai comprar ou não
+        if teclado.key_pressed("space"): #Volta para o jogo
             Game_State = 1
 
-
+        janela.update()
         return Game_State, qtdMoedasAtual, Tower_State
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
@@ -517,8 +579,18 @@ while True:
         if Game_State == 0:
             Game_State = menu()
         if Game_State == 1:
+            #Chama a pausa
             if teclado.key_pressed("escape"):
                 Game_State = 2
+            #Verifica se o mouse foi clicado e se o mouse está sobre algum dos blocos de inserção, então chama a tela de Upgrade
+            #de Torres
+            if pygame.mouse.get_pressed()[0]:
+                if verificaPosMouse(bloco1[0]-60, bloco1[0]+60, bloco1[1]-60, bloco1[1]+60):
+                    Game_State = 7
+                elif verificaPosMouse(bloco2[0]-60, bloco2[0]+60, bloco2[1]-60, bloco2[1]+60):
+                    Game_State = 7
+                elif verificaPosMouse(bloco3[0]-60, bloco3[0]+60, bloco3[1]-60, bloco3[1]+60):
+                    Game_State = 7
              #Contador de frames
             contador = contador + 1
             """
@@ -572,3 +644,5 @@ while True:
             Game_State = instrucoes()
         if Game_State == 6:
             Game_State = instrucoes2()
+        if Game_State == 7:
+            Game_State, qtdMoedas, Tower_State = telaDeUpgrade(qtdMoedas, 6)
