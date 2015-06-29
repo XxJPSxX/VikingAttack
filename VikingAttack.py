@@ -1,6 +1,6 @@
 __author__ = 'João Pedro Sá Medeiros' , 'Ian Lanza'
 """Versão Atual do Jogo"""
-versao = "v1.2.8.1" #Esta variável é utilizada no menu para exibir a versão
+versao = "v1.2.9.0" #Esta variável é utilizada no menu para exibir a versão
 #OBS: sempre que a versão for atualizada, mudar no subprograma menu a versão exibida!
 from PPlay.window import *
 from PPlay.gameimage import *
@@ -26,6 +26,8 @@ while True:
     Game_State = 0
     #Teclado
     teclado = janela.get_keyboard()
+    #Define as imagens das flechas que serão utilizadas nos subprogramas das torres
+    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 200]
     #Subprogramas
     def inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY):
         #animacao = total de imagens da animacao
@@ -300,15 +302,11 @@ while True:
         return listaInimigo
 
     def torreFinal(conf, ultimoTiro, listaTorre, listaAlvo, bloco, verificaDisparo, listaProjetil, projetil, verificador, timeDelta): #Representa a criação final da torre, a função que será chamada no game loop
-        if verificaPosMouse(bloco[0]-60, bloco[0]+60, bloco[1]-60, bloco[1]+60) and conf== 0: #Precisa-se do confirmador para que só ative 1 vez a torre
-            if pygame.mouse.get_pressed()[0]:
-                conf = 1
-        if conf == 1:
-            listaTorre[0].draw()
-            if (janela.curr_time > ultimoTiro + listaTorre[4]) and listaAlvo[2] > 0:
-                ultimoTiro = janela.curr_time
-                verificaDisparo, verificador = torreAtira(listaTorre, bloco, listaAlvo, verificaDisparo, verificador)
-                projetil, verificador = criaFlecha(listaProjetil[0], bloco[0], bloco[1])
+        listaTorre[0].draw()
+        if (janela.curr_time > ultimoTiro + listaTorre[4]) and listaAlvo[2] > 0:
+            ultimoTiro = janela.curr_time
+            verificaDisparo, verificador = torreAtira(listaTorre, bloco, listaAlvo, verificaDisparo, verificador)
+            projetil, verificador = criaFlecha(listaProjetil[0], bloco[0], bloco[1])
         if verificador == 0 and verificaDisparo == 0:
             projetil, verificador, verificaDisparo = movimentaEAtualizaProjetil(projetil, verificador, listaProjetil, listaAlvo, verificaDisparo, listaTorre, timeDelta)
         projetil.update()
@@ -434,13 +432,12 @@ while True:
     def destroiInimigos(lsTodosIni, quantidadeMoedas):
         for inimigo in range(len(lsTodosIni)):
             if lsTodosIni[inimigo][0][2] < 1:
-                lsTodosIni.remove(lsTodosIni[inimigo]) #Remove o inimigo morto da lista de inimigos
                 quantidadeMoedas = quantidadeMoedas +  lsTodosIni[inimigo][0][4] #Soma a quantidade de moedas que é o valor do inimigo
+                lsTodosIni.remove(lsTodosIni[inimigo]) #Remove o inimigo morto da lista de inimigos
                 break
         return lsTodosIni, quantidadeMoedas
 
-    def telaDeUpgrade(qtdMoedasAtual, Tower_State):
-        Game_State = 7
+    def telaDeUpgrade(Game_State, qtdMoedasAtual, Tower_StateAtual):
         #Utilidade: Esta tela irá pausar o jogo e irá disponibilizar as opções de torres para fazer upgrade dependendo do
         #Tower_State, que Tower_State = 0(significa que o bloco de inserção está vazio), Tower_State = 1(significa que o bloco
         #está com a torre tipo 1 em sua posição... Durante esta tela o usuário decide o que fazer, sua decisão deve ser passada
@@ -453,62 +450,84 @@ while True:
         #Tower_State = 0 Significa que está vazio --> "imagens\menus\Cadeados\Cadeados0.png"
         #Tower_State = 1 Significa que está com a Torre 1 --> "imagens\menus\Cadeados\Cadeados1.png"
         #assim por diante
-        Game_State = 7
         background = GameImage("imagens\menus\Torres.png")
         background.draw()
         moeda.draw()
         janela.draw_text("Moedas: "+str(qtdMoedas), 100, 0, 15, (255, 255, 255), "Arial", True)
-        if Tower_State == 0:
+        if Tower_StateAtual == 0:
             if qtdMoedasAtual < 100: #Neste caso não tem dinheiro para comprar nenhuma torre e não tem nenhuma torre
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados0.png")
                 cadeados.draw()
             else: #Neste caso tem-se dinheiro suficiente para comprar a próxima torre
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados1.png")
                 cadeados.draw()
+                if teclado.key_pressed("1"):
+                    Tower_StateAtual = 1
+                    qtdMoedasAtual = qtdMoedasAtual - 100
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
-        elif Tower_State == 1:
+        elif Tower_StateAtual == 1:
             if qtdMoedasAtual < 150:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados1.png")
                 cadeados.draw()
             else:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados2.png")
                 cadeados.draw()
+                if teclado.key_pressed("2"):
+                    Tower_StateAtual = 2
+                    qtdMoedasAtual = qtdMoedasAtual - 150
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
 
-        elif Tower_State == 2:
+        elif Tower_StateAtual == 2:
             if qtdMoedasAtual < 250:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados2.png")
                 cadeados.draw()
             else:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados3.png")
                 cadeados.draw()
+                if teclado.key_pressed("3"):
+                    Tower_StateAtual = 3
+                    qtdMoedasAtual = qtdMoedasAtual - 250
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
-        elif Tower_State == 3:
+        elif Tower_StateAtual == 3:
             if qtdMoedasAtual < 300:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados3.png")
                 cadeados.draw()
             else:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados4.png")
                 cadeados.draw()
+                if teclado.key_pressed("4"):
+                    Tower_StateAtual = 4
+                    qtdMoedasAtual = qtdMoedasAtual - 300
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
-        elif Tower_State == 4:
+        elif Tower_StateAtual == 4:
             if qtdMoedasAtual < 350:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados4.png")
                 cadeados.draw()
             else:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados5.png")
                 cadeados.draw()
+                if teclado.key_pressed("5"):
+                    Tower_StateAtual = 5
+                    qtdMoedasAtual = qtdMoedasAtual - 350
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
-        elif Tower_State == 5:
+        elif Tower_StateAtual == 5:
             if qtdMoedasAtual < 400:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados5.png")
                 cadeados.draw()
             elif qtdMoedasAtual >= 400 and qtdMoedasAtual < 500:
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados6.png")
                 cadeados.draw()
+                if teclado.key_pressed("6"):
+                    Tower_StateAtual = 6
+                    qtdMoedasAtual = qtdMoedasAtual - 400
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
             elif qtdMoedasAtual > 500:
-                temp = 1
+                if teclado.key_pressed("6"):
+                    Tower_StateAtual = 6
+                    qtdMoedasAtual = qtdMoedasAtual - 400
+                if teclado.key_pressed("7"):
+                    Tower_StateAtual = 7
+                    qtdMoedasAtual = qtdMoedasAtual - 500
                 #Fazer a torre spawnar e descontar o dinheiro se a torre for comprada
                 #Tem todos os pre requizitos para a ultima torre.
                 #Não precisa desenhar cadeado nenhum, apenas verificar se vai comprar ou não
@@ -516,7 +535,71 @@ while True:
             Game_State = 1
 
         janela.update()
-        return Game_State, qtdMoedasAtual, Tower_State
+        return Game_State, qtdMoedasAtual, Tower_StateAtual
+
+    #Os valores das Torres são destinados a teste!
+    def Torre1(bloco):
+        torreAtual = torre("imagens\Torres\TorreMadeira.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 100, 100, 10, 3000]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre2(bloco):
+        torreAtual = torre("imagens\Torres\TorreAntiga.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 150, 150, 15, 2500]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre3(bloco):
+        torreAtual = torre("imagens\Torres\TorrePedra.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 150, 150, 25, 2500]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre4(bloco):
+        torreAtual = torre("imagens\Torres\TorrePedra2.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 200, 200, 35, 2000]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre5(bloco):
+        torreAtual = torre("imagens\Torres\TorrePedra3.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 200, 200, 50, 2500]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre6(bloco):
+        torreAtual = torre("imagens\Torres\CampoDeArqueiros.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 300, 300, 70, 1500]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+    def Torre7(bloco):
+        torreAtual = torre("imagens\Torres\TorreFinal.png", bloco)
+        #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
+        listaTorre = [torreAtual, 200, 200, 200, 4500]
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        return listaTorre, flecha, verifica
+
+    def selecionaTipoDeTorre(Tower_StateAt, bloco):
+        listaTorre = []
+        flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
+        if Tower_StateAt == 1:
+            listaTorre, flecha, verifica = Torre1(bloco)
+        if Tower_StateAt == 2:
+            listaTorre, flecha, verifica = Torre2(bloco)
+        if Tower_StateAt == 3:
+            listaTorre, flecha, verifica = Torre3(bloco)
+        if Tower_StateAt == 4:
+            listaTorre, flecha, verifica = Torre4(bloco)
+        if Tower_StateAt == 5:
+            listaTorre, flecha, verifica = Torre5(bloco)
+        if Tower_StateAt == 6:
+            listaTorre, flecha, verifica = Torre6(bloco)
+        if Tower_StateAt == 7:
+            listaTorre, flecha, verifica = Torre7(bloco)
+        return listaTorre, flecha, verifica
+
     #Define o ícone obs:(Não funciona completamente)
     icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
     pygame.display.set_icon(icone)
@@ -536,21 +619,24 @@ while True:
     bloco1 = [322, 212]
     bloco2 = [181, 388]
     bloco3 = [444, 378]
-    spriteTorre1 = "imagens\Torres\TorrePedra.png" #Tive que definir o sprite antes
-    spriteTorre2 = "imagens\Torres\TorrePedra.png"
-    spriteTorre3 = "imagens\Torres\TorrePedra.png"
-    torre1 = torre(spriteTorre1, bloco1)
-    torre2 = torre(spriteTorre2, bloco2)
-    torre3 = torre(spriteTorre3, bloco3)
+    #spriteTorre1 = "imagens\Torres\TorrePedra.png" #Tive que definir o sprite antes
+    #spriteTorre2 = "imagens\Torres\TorrePedra.png"
+    #spriteTorre3 = "imagens\Torres\TorrePedra.png"
+    #torre1 = torre(spriteTorre1, bloco1)
+    #torre2 = torre(spriteTorre2, bloco2)
+    #torre3 = torre(spriteTorre3, bloco3)
     #Define Flecha
-    vetorFlecha = ["imagens\Projeteis\Flechas\Flecha1.png", "imagens\Projeteis\Flechas\Flecha2.png", "imagens\Projeteis\Flechas\Flecha3.png", "imagens\Projeteis\Flechas\Flecha4.png", 200]
+
     flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
     flechaT1, flechaT2, flechaT3 = flecha, flecha, flecha
     verificaT1, verificaT2, verificaT3 = verifica, verifica, verifica
     #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
-    listaTorre1 = [torre1, 150, 150, 10, 2000] #VALORES DESTINADOS À TESTE
-    listaTorre2 = [torre2, 150, 150, 10, 2000]
-    listaTorre3 = [torre3, 150, 150, 10, 2000]
+    #listaTorre1 = [torre1, 150, 150, 10, 2000] #VALORES DESTINADOS À TESTE
+    #listaTorre2 = [torre2, 150, 150, 10, 2000]
+    #listaTorre3 = [torre3, 150, 150, 10, 2000]
+    listaTorre1 = []
+    listaTorre2 = []
+    listaTorre3 = []
     confirmador = 0
     confirmador1 = 0
     confirmador2 = 0
@@ -568,7 +654,10 @@ while True:
     tempoJanelaAtual = 0
     moeda = GameImage("imagens\moeda.png")
     moeda.set_position(75, 0)
-    qtdMoedas = 0
+    Tower_StateT1 = 0
+    Tower_StateT2 = 0
+    Tower_StateT3 = 0
+    qtdMoedas = 2000
     #Mouse
         #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
         #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
@@ -587,10 +676,10 @@ while True:
             if pygame.mouse.get_pressed()[0]:
                 if verificaPosMouse(bloco1[0]-60, bloco1[0]+60, bloco1[1]-60, bloco1[1]+60):
                     Game_State = 7
-                elif verificaPosMouse(bloco2[0]-60, bloco2[0]+60, bloco2[1]-60, bloco2[1]+60):
-                    Game_State = 7
-                elif verificaPosMouse(bloco3[0]-60, bloco3[0]+60, bloco3[1]-60, bloco3[1]+60):
-                    Game_State = 7
+                if verificaPosMouse(bloco2[0]-60, bloco2[0]+60, bloco2[1]-60, bloco2[1]+60):
+                    Game_State = 8
+                if verificaPosMouse(bloco3[0]-60, bloco3[0]+60, bloco3[1]-60, bloco3[1]+60):
+                    Game_State = 9
              #Contador de frames
             contador = contador + 1
             """
@@ -622,19 +711,24 @@ while True:
             #inimigoFinal(deltaTime, listaSoldado0, vetorSoldado0, vetorVerificadoresSol0)
             #Torres
                 #Torre1
-            AlvoT1 = selecionaAlvo(listaTodosInimigos, bloco1, listaTorre1)
-            confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, AlvoT1, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1, deltaTime)
+            if listaTorre1 != []:
+                AlvoT1 = selecionaAlvo(listaTodosInimigos, bloco1, listaTorre1)
+                confirmador, ultimoTiroT1, flechaT1, verificaT1, verificaTiroT1 = torreFinal(confirmador, ultimoTiroT1, listaTorre1, AlvoT1, bloco1, verificaTiroT1, vetorFlecha, flechaT1, verificaT1, deltaTime)
                 #Torre2
-            AlvoT2 = selecionaAlvo(listaTodosInimigos, bloco2, listaTorre2)
-            confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, AlvoT2, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2, deltaTime)
+            if listaTorre2 != []:
+                AlvoT2 = selecionaAlvo(listaTodosInimigos, bloco2, listaTorre2)
+                confirmador1, ultimoTiroT2, flechaT2, verificaT2, verificaTiroT2 = torreFinal(confirmador1, ultimoTiroT2, listaTorre2, AlvoT2, bloco2, verificaTiroT2, vetorFlecha, flechaT2, verificaT2, deltaTime)
                 #Torre3
-            AlvoT3 = selecionaAlvo(listaTodosInimigos, bloco3, listaTorre3)
-            confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, AlvoT3, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3, deltaTime)
+            if listaTorre3 != []:
+                AlvoT3 = selecionaAlvo(listaTodosInimigos, bloco3, listaTorre3)
+                confirmador2, ultimoTiroT3, flechaT3, verificaT3, verificaTiroT3 = torreFinal(confirmador2, ultimoTiroT3, listaTorre3, AlvoT3, bloco3, verificaTiroT3, vetorFlecha, flechaT3, verificaT3, deltaTime)
+
             listaTodosInimigos, qtdMoedas = destroiInimigos(listaTodosInimigos, qtdMoedas) #Esta função retira os inimigos da lista que contém todos eles
 
             #Musica
             #musicaAtual.play() Temporariamente coloquei o .play() fora do loop
             #PROBLEMA!! Música sendo reproduzida mais de uma vez ao mesmo tempo
+
             janela.update()
         if Game_State == 2:
             Game_State = pausa()
@@ -645,4 +739,11 @@ while True:
         if Game_State == 6:
             Game_State = instrucoes2()
         if Game_State == 7:
-            Game_State, qtdMoedas, Tower_State = telaDeUpgrade(qtdMoedas, 6)
+            Game_State, qtdMoedas, Tower_StateT1 = telaDeUpgrade(Game_State, qtdMoedas, Tower_StateT1)
+            listaTorre1, flechaT1, verificaT1 = selecionaTipoDeTorre(Tower_StateT1, bloco1)
+        if Game_State == 8:
+            Game_State, qtdMoedas, Tower_StateT2 = telaDeUpgrade(Game_State, qtdMoedas, Tower_StateT2)
+            listaTorre2, flechaT2, verificaT2 = selecionaTipoDeTorre(Tower_StateT2, bloco2)
+        if Game_State == 9:
+            Game_State, qtdMoedas, Tower_StateT3 = telaDeUpgrade(Game_State, qtdMoedas, Tower_StateT3)
+            listaTorre3, flechaT3, verificaT3 = selecionaTipoDeTorre(Tower_StateT3, bloco3)
