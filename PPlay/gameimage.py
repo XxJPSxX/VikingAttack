@@ -26,6 +26,8 @@ class GameImage(gameobject.GameObject):
         self.width = self.image.get_rect().width
         self.height = self.image.get_rect().height
 
+
+
         
 
     """Draws the image on the screen"""
@@ -40,3 +42,7 @@ class GameImage(gameobject.GameObject):
     def set_position(self, x, y):
         self.x = x
         self.y = y
+
+    def SetAlpha(self, number):
+        self.image.set_alpha(number)
+        self.image.convert_alpha()

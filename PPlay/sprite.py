@@ -45,4 +45,7 @@ class Sprite(animation.Animation):
     def move_y(self, speed):
         self.y += speed
         self.set_position(self.x, self.y)
-            
+
+    def SetAlpha(self, number):
+        self.image.set_alpha(number)
+        self.image.convert_alpha()

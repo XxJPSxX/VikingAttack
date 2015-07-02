@@ -210,33 +210,67 @@ while True:
 
     #def dinheiro():
     #    coins = 0
-    def instrucoes():
+    def instrucoes(ver1):
         Game_State = 5
-        background = GameImage("imagens\menus\instrucoes.png")
-        background.draw()
+        if ver1 != 1:
+            background = GameImage("imagens\menus\instrucoes.png")
+        if ver1 == 1:
+            background = GameImage("imagens\menus\creditos.png")
         if teclado.key_pressed("escape"):
             Game_State = 0
-        janela.update()
-        return Game_State
-    def instrucoes2():
-        Game_State = 6
-        background = GameImage("imagens\menus\instrucoes.png")
+        if teclado.key_pressed("c"):
+            ver1 = 1
         background.draw()
+        janela.update()
+        return Game_State, ver1
+    def instrucoes2(ver2):
+        Game_State = 6
+        if ver2 != 1:
+            background = GameImage("imagens\menus\instrucoes.png")
+        if ver2 == 1:
+            background = GameImage("imagens\menus\creditos.png")
         if teclado.key_pressed("escape"):
             Game_State = 2
+        if teclado.key_pressed("c"):
+            ver2 = 1
+        background.draw()
         janela.update()
-        return Game_State
+        return Game_State, ver2
 
-    def menu():
+    def menu(img1, img2):
         Game_State = 0
         background = GameImage("imagens\menus\iniciar.png")
         background.draw()
+        img1.move_x(2)
+        #image.SetAlpha(0)
+        img1.draw()
+        img1.update()
+        img2.move_x(2)
+        #image.SetAlpha(0)
+        img2.draw()
+        img2.update()
+        if int(img2.x) == 1000: #Sem o int não funciona pois o valor em ponto flutuante não é um valor exato
+            #img1.set_position(-1000, 0)
+            img2.set_position(-1000, 0)
+        if int(img1.x) == 1000: #Sem o int não funciona pois o valor em ponto flutuante não é um valor exato
+            img1.set_position(-1000, 0)
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("enter"):
             Game_State = 1
-
         if teclado.key_pressed("i"):
             Game_State = 5
+        janela.update()
+        return Game_State, img1, img2
+
+    def vitoria():
+        Game_State = 10
+        background = GameImage("imagens\menus\Venceu.png")
+        background.draw()
+        if teclado.key_pressed("enter"):
+            Game_State = 3
+        if teclado.key_pressed("escape"):
+            janela.close()
+            musicaAtual.stop()
         janela.update()
         return Game_State
 
@@ -328,7 +362,7 @@ while True:
         #Utilidade: Definir previamente o soldado tipo 1
         #inimigo(endereco, animacao, animacaoInicial, animacaoFinal, duracao, posX, posY)
         soldadoSprite1, alturaSol1 = inimigo("imagens\soldado1\soldado1lado1.png", 9, 0, 9, 1000, 0, 140)
-        vidaSol1 = 300
+        vidaSol1 = 100
         velocidadeSol1 = 70
         valorEmMoedas = 100
         #listaSoldado = [soldado(sprite), alturaSoldado, vidaSoldado, velocidadeSoldado]
@@ -371,9 +405,12 @@ while True:
     def waves():
         #Utilizade: definir previamente o conteúdo de todas as waves
         #waveX = [soldado0, soldado1, ...]
-        wave0 = [2, 0] #3 soldados0, 1 soldado1 ...
-        wave1 = [0, 2]
-        wave2 = [2, 0]
+        #wave0 = [5, 0] #3 soldados0, 1 soldado1 ...
+        #wave1 = [3, 1]
+        #wave2 = [5, 2]
+        wave0 = [1, 0] #3 soldados0, 1 soldado1 ...
+        wave1 = [0, 1]
+        wave2 = [1, 0]
         todasWaves = [wave0, wave1, wave2]
         return todasWaves
 
@@ -386,7 +423,7 @@ while True:
         soma1 = 0
         soma2 = 0
         tempoDeEspaco = randint(1000, 4000)
-        espacoEntreWaves = 5000
+        espacoEntreWaves = 1000
         waveDesejada = wavesTodas[contWave]
         if janela.curr_time > ultimaWave + espacoEntreWaves:
             for i in range(len(waveDesejada)):
@@ -658,6 +695,17 @@ while True:
     Tower_StateT2 = 0
     Tower_StateT3 = 0
     qtdMoedas = 2000
+    ver1 = 0
+    ver2 = 0
+    #Nuvem
+    nuvem1 = Sprite("imagens\cloud.png", 1)
+    nuvem1.set_position(-1000, 0)
+    nuvem1.set_sequence(0, 1)
+    nuvem1.set_total_duration(0)
+    nuvem2 = Sprite("imagens\cloud.png", 1)
+    nuvem2.set_position(0, 0)
+    nuvem2.set_sequence(0, 1)
+    nuvem2.set_total_duration(0)
     #Mouse
         #Muda o cursor OBS: https://www.pygame.org/docs/ref/cursors.html
         #OBS: pygame.mouse.get_pressed()[0]: #se clicado o botão 0, retorna True
@@ -666,7 +714,7 @@ while True:
     #GameLoop
     while Game_State != 3:
         if Game_State == 0:
-            Game_State = menu()
+            Game_State, nuvem1, nuvem2 = menu(nuvem1, nuvem2)
         if Game_State == 1:
             #Chama a pausa
             if teclado.key_pressed("escape"):
@@ -680,6 +728,9 @@ while True:
                     Game_State = 8
                 if verificaPosMouse(bloco3[0]-60, bloco3[0]+60, bloco3[1]-60, bloco3[1]+60):
                     Game_State = 9
+
+            if waveAtual == len(waves()) and listaTodosInimigos == []:
+                Game_State = 10
              #Contador de frames
             contador = contador + 1
             """
@@ -735,9 +786,9 @@ while True:
         if Game_State == 4:
             Game_State = derrota()
         if Game_State == 5:
-            Game_State = instrucoes()
+            Game_State, ver1 = instrucoes(ver1)
         if Game_State == 6:
-            Game_State = instrucoes2()
+            Game_State, ver2 = instrucoes2(ver2)
         if Game_State == 7:
             Game_State, qtdMoedas, Tower_StateT1 = telaDeUpgrade(Game_State, qtdMoedas, Tower_StateT1)
             listaTorre1, flechaT1, verificaT1 = selecionaTipoDeTorre(Tower_StateT1, bloco1)
@@ -747,3 +798,5 @@ while True:
         if Game_State == 9:
             Game_State, qtdMoedas, Tower_StateT3 = telaDeUpgrade(Game_State, qtdMoedas, Tower_StateT3)
             listaTorre3, flechaT3, verificaT3 = selecionaTipoDeTorre(Tower_StateT3, bloco3)
+        if Game_State == 10:
+            Game_State = vitoria()
