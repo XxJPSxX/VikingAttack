@@ -200,6 +200,7 @@ while True:
         janela.draw_text(str(versao), 0, 584, 15, (255, 255, 255), "Arial", True)
         if teclado.key_pressed("escape"):
             janela.close()
+            musicaAtual.stop()
         if teclado.key_pressed("enter"):
             Game_State = 3
             musicaAtual.stop() #Sem isso a música começa a tocar novamente encima da outra
@@ -270,6 +271,7 @@ while True:
         background.draw()
         if teclado.key_pressed("enter"):
             Game_State = 3
+            musicaAtual.stop()
         if teclado.key_pressed("escape"):
             janela.close()
             musicaAtual.stop()
