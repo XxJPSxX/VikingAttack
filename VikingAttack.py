@@ -189,8 +189,9 @@ while True:
             musicaAtual.stop()
         if teclado.key_pressed("i"):
             Game_State = 6
+        ver2 = 0
         janela.update()
-        return Game_State
+        return Game_State, ver2
     def derrota():
 
         Game_State = 4
@@ -259,8 +260,9 @@ while True:
             Game_State = 1
         if teclado.key_pressed("i"):
             Game_State = 5
+        ver1 = 0
         janela.update()
-        return Game_State, img1, img2
+        return Game_State, img1, img2, ver1
 
     def vitoria():
         Game_State = 10
@@ -714,7 +716,7 @@ while True:
     #GameLoop
     while Game_State != 3:
         if Game_State == 0:
-            Game_State, nuvem1, nuvem2 = menu(nuvem1, nuvem2)
+            Game_State, nuvem1, nuvem2, ver1 = menu(nuvem1, nuvem2)
         if Game_State == 1:
             #Chama a pausa
             if teclado.key_pressed("escape"):
@@ -782,7 +784,7 @@ while True:
 
             janela.update()
         if Game_State == 2:
-            Game_State = pausa()
+            Game_State, ver2 = pausa()
         if Game_State == 4:
             Game_State = derrota()
         if Game_State == 5:
