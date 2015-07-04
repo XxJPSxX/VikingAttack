@@ -214,27 +214,35 @@ while True:
     #    coins = 0
     def instrucoes(ver1):
         Game_State = 5
-        if ver1 != 1:
+        if ver1 < 1:
             background = GameImage("imagens\menus\instrucoes.png")
         if ver1 == 1:
             background = GameImage("imagens\menus\creditos.png")
+        if ver1 == 2:
+            background = GameImage("imagens\menus\Atributos.png")
         if teclado.key_pressed("escape"):
             Game_State = 0
         if teclado.key_pressed("c"):
             ver1 = 1
+        if teclado.key_pressed("a"):
+            ver1 = 2
         background.draw()
         janela.update()
         return Game_State, ver1
     def instrucoes2(ver2):
         Game_State = 6
-        if ver2 != 1:
+        if ver2 < 1:
             background = GameImage("imagens\menus\instrucoes.png")
         if ver2 == 1:
             background = GameImage("imagens\menus\creditos.png")
+        if ver2 == 2:
+            background = GameImage("imagens\menus\Atributos.png")
         if teclado.key_pressed("escape"):
             Game_State = 2
         if teclado.key_pressed("c"):
             ver2 = 1
+        if teclado.key_pressed("a"):
+            ver2 = 2
         background.draw()
         janela.update()
         return Game_State, ver2
@@ -412,9 +420,9 @@ while True:
         #wave0 = [5, 0] #3 soldados0, 1 soldado1 ...
         #wave1 = [3, 1]
         #wave2 = [5, 2]
-        wave0 = [1, 0] #3 soldados0, 1 soldado1 ...
-        wave1 = [0, 1]
-        wave2 = [1, 0]
+        wave0 = [2, 1] #3 soldados0, 1 soldado1 ...
+        wave1 = [4, 2]
+        wave2 = [6, 4]
         todasWaves = [wave0, wave1, wave2]
         return todasWaves
 
@@ -495,6 +503,7 @@ while True:
         background.draw()
         moeda.draw()
         janela.draw_text("Moedas: "+str(qtdMoedas), 100, 0, 15, (255, 255, 255), "Arial", True)
+        janela.draw_text(str(Tower_StateAtual), 240, 390, 40, (0, 0, 0), "Algerian")
         if Tower_StateAtual == 0:
             if qtdMoedasAtual < 100: #Neste caso não tem dinheiro para comprar nenhuma torre e não tem nenhuma torre
                 cadeados = GameImage("imagens\menus\Cadeados\Cadeados0.png")
@@ -618,7 +627,7 @@ while True:
     def Torre7(bloco):
         torreAtual = torre("imagens\Torres\TorreFinal.png", bloco)
         #listaTorre = [objeto, alcanceX, alcanceY, dano, taxaDeDisparo]
-        listaTorre = [torreAtual, 200, 200, 200, 4500]
+        listaTorre = [torreAtual, 200, 200, 150, 3500]
         flecha, verifica = criaFlecha(vetorFlecha[0], 0, 0)
         return listaTorre, flecha, verifica
 
@@ -642,7 +651,7 @@ while True:
         return listaTorre, flecha, verifica
 
     #Define o ícone obs:(Não funciona completamente)
-    icone = pygame.image.load("imagens\icone.jpg").convert_alpha()
+    icone = pygame.image.load("imagens\icone2.jpg").convert_alpha()
     pygame.display.set_icon(icone)
     #Inimigos
     listaTodosInimigos = [] #é uma lista em que estão armazenados todos os inimigos spawnados

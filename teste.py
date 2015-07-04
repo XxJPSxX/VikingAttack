@@ -1,6 +1,6 @@
 __author__ = 'JPS'
 import pygame, sys, os
-from pygame.locals import *
+from pygame import *
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 background =  pygame.image.load(os.path.join("imagens\menus\iniciar.png"))
